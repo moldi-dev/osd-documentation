@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.8.23)  8 NOV 2025 21:42
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.8.23)  8 NOV 2025 23:51
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -925,212 +925,247 @@ Overfull \hbox (29.23813pt too wide) in paragraph at lines 40--43
  []
 
 [37]
-Overfull \hbox (0.6045pt too wide) in paragraph at lines 51--52
-[]\T1/cmr/m/n/12 Implement the sys-tem calls \T1/cmr/m/it/12 SyscallThread-Exit()\T1/cmr/m/n/12 , \T1/cmr/m/it/12 SyscallThread-Cre-ate()\T1/cmr/m/n/12 ,
- []
-
-
-Overfull \hbox (45.72961pt too wide) in paragraph at lines 51--52
-\T1/cmr/m/it/12 SyscallThread-Get-Tid()\T1/cmr/m/n/12 , \T1/cmr/m/it/12 SyscallThread-Wait-ForTer-mi-na-tion() \T1/cmr/m/n/12 and \T1/cmr/m/it/12 SyscallThread-
- []
-
-
-Overfull \hbox (43.3531pt too wide) in paragraph at lines 65--66
+Overfull \hbox (43.3531pt too wide) in paragraph at lines 64--65
 \T1/cmr/m/n/12 ing or log-ging pur-poses. The pro-gram then uses [][][][][][]
  []
 
 [38] [39] [40]
-Overfull \hbox (15.6673pt too wide) in paragraph at lines 171--172
-[]\T1/cmr/bx/n/12 SyscallThreadWaitForTermination(ThreadHandle, Ret-val): \T1/cmr/m/n/12 Wait
+Overfull \hbox (58.1466pt too wide) in paragraph at lines 154--155
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (9.98984pt too wide) in paragraph at lines 181--183
-\T1/cmr/m/n/12 passed from user space ref-er-ence valid, prop-erly aligned mem-ory re-gions.Thread
+Overfull \hbox (30.9862pt too wide) in paragraph at lines 156--157
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (3.8258pt too wide) in paragraph at lines 161--162
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (3.8258pt too wide) in paragraph at lines 170--171
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (79.64479pt too wide) in paragraph at lines 176--181
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (102.27827pt too wide) in paragraph at lines 176--181
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 176--181
+
  []
 
 [41]
-Overfull \hbox (83.23953pt too wide) in paragraph at lines 189--190
-[][][][][][]\T1/cmr/m/n/12 , [][][][][][], [][][][][][], and [][][][][][]. 
- []
-
-
-Overfull \hbox (27.02078pt too wide) in paragraph at lines 193--194
-[][][][][][][] \T1/cmr/m/n/12 will use [][][][][][]
+Overfull \hbox (14.3055pt too wide) in paragraph at lines 212--213
+[][][][][][][][][][][][][][][][][][][][][]\T1/cmr/m/n/12 : Cre-ate a new thread
  []
 
 [42]
-Overfull \hbox (71.02858pt too wide) in paragraph at lines 225--226
+Overfull \hbox (7.46281pt too wide) in paragraph at lines 216--217
+[][][][][][][][][][][][][][][][]\T1/cmr/m/n/12 : Wait for the
+ []
+
+
+Overfull \hbox (14.3055pt too wide) in paragraph at lines 227--228
+[][][][][][][][][][][][][][][][][][][][][]\T1/cmr/m/n/12 : Cre-ate a new thread
+ []
+
+
+Overfull \hbox (7.46281pt too wide) in paragraph at lines 231--232
+[][][][][][][][][][][][][][][][]\T1/cmr/m/n/12 : Wait for the
+ []
+
+
+Overfull \hbox (9.98984pt too wide) in paragraph at lines 241--243
+\T1/cmr/m/n/12 passed from user space ref-er-ence valid, prop-erly aligned mem-ory re-gions.Thread
+ []
+
+[43]
+Overfull \hbox (59.30614pt too wide) in paragraph at lines 249--250
+\T1/cmr/m/n/12 and [][][][][][][][][], such as [][][][][][], [][][][][][], [][][][][][],
+ []
+
+
+Overfull \hbox (27.02078pt too wide) in paragraph at lines 253--254
+[][][][][][][] \T1/cmr/m/n/12 will use [][][][][][]
+ []
+
+[44]
+Overfull \hbox (71.02858pt too wide) in paragraph at lines 285--286
  []\T1/cmr/bx/n/12 Goal.[] \T1/cmr/m/n/12 Ar-gu-ment pass-ing pre-pares a fresh user stack so that [][][][][][][][][][][][][][][][][][][][][][][][]
  []
 
 
-Overfull \hbox (102.51775pt too wide) in paragraph at lines 225--226
+Overfull \hbox (102.51775pt too wide) in paragraph at lines 285--286
 \T1/cmr/m/n/12 sees the ex-pected in-puts. In HAL9000 this work is driven by [][][][][][]:
  []
 
 (/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
 File: uni-32.def 2022/08/07 UCS: Unicode data U+2000..U+20FF
 )
-Overfull \hbox (8.84142pt too wide) in paragraph at lines 228--230
+Overfull \hbox (8.84142pt too wide) in paragraph at lines 288--290
 \T1/cmr/m/n/12 ment count from the [][][][][] ob-ject ([][][][][] and [][][][][]).
  []
 
 
-Overfull \hbox (12.32664pt too wide) in paragraph at lines 228--230
+Overfull \hbox (12.32664pt too wide) in paragraph at lines 288--290
 \T1/cmr/m/n/12 a tem-po-rary ker-nel map-ping with [][][][][][]
  []
 
 
-Overfull \hbox (1.86537pt too wide) in paragraph at lines 228--230
+Overfull \hbox (1.86537pt too wide) in paragraph at lines 288--290
 \T1/cmr/m/n/12 and re-leases it with [][][][][][] once setup
  []
 
-[43]
-Overfull \hbox (51.35294pt too wide) in paragraph at lines 280--281
+[45]
+Overfull \hbox (51.35294pt too wide) in paragraph at lines 340--341
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[44]
-Overfull \hbox (0.4276pt too wide) in paragraph at lines 294--295
+[46]
+Overfull \hbox (0.4276pt too wide) in paragraph at lines 354--355
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (0.4276pt too wide) in paragraph at lines 301--302
+Overfull \hbox (0.4276pt too wide) in paragraph at lines 361--362
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (51.35294pt too wide) in paragraph at lines 315--317
+Overfull \hbox (51.35294pt too wide) in paragraph at lines 375--377
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (119.25339pt too wide) in paragraph at lines 319--320
+Overfull \hbox (119.25339pt too wide) in paragraph at lines 379--380
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (62.66968pt too wide) in paragraph at lines 321--323
+Overfull \hbox (62.66968pt too wide) in paragraph at lines 381--383
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (124.91176pt too wide) in paragraph at lines 325--327
+Overfull \hbox (124.91176pt too wide) in paragraph at lines 385--387
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[45]
-Overfull \hbox (45.69456pt too wide) in paragraph at lines 335--336
+[47]
+Overfull \hbox (45.69456pt too wide) in paragraph at lines 395--396
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (0.4276pt too wide) in paragraph at lines 347--348
+Overfull \hbox (0.4276pt too wide) in paragraph at lines 407--408
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (57.0113pt too wide) in paragraph at lines 348--350
+Overfull \hbox (57.0113pt too wide) in paragraph at lines 408--410
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[46]
-Overfull \hbox (34.37782pt too wide) in paragraph at lines 376--377
+[48]
+Overfull \hbox (34.37782pt too wide) in paragraph at lines 436--437
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (34.37782pt too wide) in paragraph at lines 384--385
+Overfull \hbox (34.37782pt too wide) in paragraph at lines 444--445
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (173.4896pt too wide) in paragraph at lines 394--395
+Overfull \hbox (173.4896pt too wide) in paragraph at lines 454--455
 [][][][][][]\T1/cmr/m/n/12 , which in turn calls into [][][][][][] and [][][][][][]. 
  []
 
-[47]
-Overfull \hbox (10.1695pt too wide) in paragraph at lines 411--412
+[49]
+Overfull \hbox (10.1695pt too wide) in paragraph at lines 471--472
  []\T1/cmr/bx/n/12 Execution Flow.[] \T1/cmr/m/n/12 The en-hanced [][][][][][] per-forms ini-tial pointer
  []
 
 
-Overfull \hbox (4.41957pt too wide) in paragraph at lines 411--412
+Overfull \hbox (4.41957pt too wide) in paragraph at lines 471--472
 \T1/cmr/m/n/12 pages the buffer cov-ers, and walks through each one us-ing [][][][][][].
  []
 
 
-Overfull \hbox (68.32805pt too wide) in paragraph at lines 416--417
+Overfull \hbox (68.32805pt too wide) in paragraph at lines 476--477
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[48] [49]
-Overfull \hbox (2.52707pt too wide) in paragraph at lines 490--492
-\T1/cmr/m/n/12 The file han-dle is sent to the ker-nel when the user in-vokes [][][][][][].
- []
-
-[50]
-Overfull \hbox (17.6286pt too wide) in paragraph at lines 527--528
+[50] [51] [52]
+Overfull \hbox (17.6286pt too wide) in paragraph at lines 586--587
 []\T1/cmr/m/n/12 Retrieve the Thread ID as-so-ci-ated to the given [][][][][]. If [][][][][]
  []
 
 
-Overfull \hbox (3.19237pt too wide) in paragraph at lines 540--541
+Overfull \hbox (3.19237pt too wide) in paragraph at lines 599--600
 []\T1/cmr/m/n/12 The [][][][][] al-lows for syn-chro-niza-tion be-tween
  []
 
-[51]
-Overfull \hbox (18.83502pt too wide) in paragraph at lines 567--570
+[53]
+Overfull \hbox (18.83502pt too wide) in paragraph at lines 626--629
 [][][][][][]\T1/cmr/m/n/12 : Val-i-dates proper han-dling of a sin-gle ar-gu-ment. [][][][][][][][][]
  []
 
-[52]
-Overfull \hbox (5.77745pt too wide) in paragraph at lines 599--600
+[54]
+Overfull \hbox (5.77745pt too wide) in paragraph at lines 658--659
 [][][][][][]\T1/cmr/m/n/12 : Tests be-hav-ior when read-ing from a non-canonical
  []
 
 
-Overfull \hbox (6.9632pt too wide) in paragraph at lines 609--610
+Overfull \hbox (6.9632pt too wide) in paragraph at lines 668--669
 [][][][][][]\T1/cmr/m/n/12 : En-sures in-valid writes to non-canonical ad-dresses
  []
 
-[53]
-Overfull \hbox (85.99751pt too wide) in paragraph at lines 624--625
+[55]
+Overfull \hbox (85.99751pt too wide) in paragraph at lines 683--684
 [][][][][][]\T1/cmr/m/n/12 : Val-i-dates ar-gu-ment safety by call-ing [][][][][][]
  []
 
 
-Overfull \hbox (5.15005pt too wide) in paragraph at lines 628--629
+Overfull \hbox (5.15005pt too wide) in paragraph at lines 687--688
 [][][][][][]\T1/cmr/m/n/12 : En-sures command-line ar-gu-ments are cor-
  []
 
 
-Overfull \hbox (6.33807pt too wide) in paragraph at lines 631--632
+Overfull \hbox (6.33807pt too wide) in paragraph at lines 690--691
 [][][][][][]\T1/cmr/m/n/12 : Calls [][][][][][] with
  []
 
 
-Overfull \hbox (0.61353pt too wide) in paragraph at lines 634--635
+Overfull \hbox (0.61353pt too wide) in paragraph at lines 693--694
 [][][][][][]\T1/cmr/m/n/12 : En-sures that wait-ing on an already-terminated
  []
 
-[54]
-Overfull \hbox (1.22375pt too wide) in paragraph at lines 657--658
+[56]
+Overfull \hbox (1.22375pt too wide) in paragraph at lines 716--717
 [][][][][][]\T1/cmr/m/n/12 : At-tempts to read from write-only [][][][][]; must
  []
 
-[55]
-Overfull \hbox (21.87581pt too wide) in paragraph at lines 672--673
+[57]
+Overfull \hbox (21.87581pt too wide) in paragraph at lines 731--732
 [][][][][][]\T1/cmr/m/n/12 : Test the be-haviour of [][][][][]
  []
 
-) (./os-module-3-design.tex [56]
+) (./os-module-3-design.tex [58]
 Chapter 5.
-[57
+[59
 
-] [58] [59] [60] [61]) (./os-module-4-design.tex [62]
+] [60] [61] [62] [63]) (./os-module-4-design.tex [64]
 Chapter 6.
 
 Overfull \hbox (7.85922pt too wide) in paragraph at lines 18--19
@@ -1142,14 +1177,14 @@ Overfull \hbox (6.21153pt too wide) in paragraph at lines 18--19
 \T1/cmr/m/n/12 ready lists and change the thread sched-uler to sup-port schedul-ing threads
  []
 
-[63
+[65
 
 ]
 Overfull \hbox (9.08894pt too wide) in paragraph at lines 24--25
 \T1/cmr/m/n/12 to the thread cre-ation sys-tem call, which will func-tion as a processor-
  []
 
-[64] [65] [66]) [67] (./os-design.aux)
+[66] [67] [68]) [69] (./os-design.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -1157,18 +1192,18 @@ Package rerunfilecheck Info: File `os-design.out' has not changed.
 (rerunfilecheck)             Checksum: 931D0FD5827DDCFA749FF49BECF643EB;11048.
  ) 
 Here is how much of TeX's memory you used:
- 26426 strings out of 476041
- 474369 string characters out of 5793174
- 1911388 words of memory out of 6000000
- 45761 multiletter control sequences out of 15000+600000
+ 26534 strings out of 476041
+ 475916 string characters out of 5793174
+ 1909388 words of memory out of 6000000
+ 45838 multiletter control sequences out of 15000+600000
  532809 words of font info for 81 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
  92i,6n,93p,2077b,2040s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbi2488.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfit1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfti2074.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on os-design.pdf (69 pages, 529215 bytes).
+Output written on os-design.pdf (71 pages, 537683 bytes).
 PDF statistics:
- 1323 PDF objects out of 1440 (max. 8388607)
- 1200 compressed objects within 12 object streams
- 651 named destinations out of 1000 (max. 500000)
+ 1366 PDF objects out of 1440 (max. 8388607)
+ 1240 compressed objects within 13 object streams
+ 682 named destinations out of 1000 (max. 500000)
  498 words of extra memory for PDF output out of 10000 (max. 10000000)
 

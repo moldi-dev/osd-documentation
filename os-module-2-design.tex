@@ -47,9 +47,8 @@ System calls are necessary for file system access so that user programs can safe
 
 \subsection*{System Calls for Thread Management}
 
-\begin{itemize}
-    \item Implement the system calls \textit{SyscallThreadExit()}, \textit{SyscallThreadCreate()}, \textit{SyscallThreadGetTid()}, \textit{SyscallThreadWaitForTermination()} and \textit{SyscallThreadCloseHandle()}.
-\end{itemize}
+Implement the system calls \lstinline|SyscallThreadExit()|, \lstinline|SyscallThreadCreate()|, \lstinline|SyscallThreadGetTid()|, \lstinline|SyscallThreadWaitForTermination()| and \newline \lstinline|SyscallThreadCloseHandle()|.
+
 
 \subsection{Basic Use Cases}
 
@@ -70,9 +69,9 @@ In order to load configuration settings or process user input, a user applicatio
 
 \subsection*{System Calls for Thread Management}
 
-\textbf{File Editing:} A basic text editor requires access to the file system in order to create and update files. Various essential commands such as \texttt{ls}, \texttt{touch}, and \texttt{rm} require access to the file system.
+\textbf{File Editing:} A basic text editor requires access to the file system in order to create and update files. Various essential commands such as \lstinline|ls|, \lstinline|touch|, and \lstinline|rm| require access to the file system.
 
-\textbf{Build System:} A compilation tool like \texttt{make} needs to compile multiple source files in parallel to reduce build time. It uses system calls to spawn compiler processes for independent files, passes command-line arguments specifying input files and compiler flags, and uses wait operations to synchronize completion before linking.
+\noindent \textbf{Build System:} A compilation tool like \lstinline|make| needs to compile multiple source files in parallel to reduce build time. It uses system calls to spawn compiler processes for independent files, passes command-line arguments specifying input files and compiler flags, and uses wait operations to synchronize completion before linking.
 
 % ================================================================================= %
 \section{Design Description}
@@ -134,8 +133,55 @@ through every page occupied by the buffer.
 
 \subsection*{System Calls for Process Management}
 
-The process management system calls enable user-mode applications to create, control, and synchronize processes effectively.  
-The following functions must be modified or implemented to complete this functionality.
+\subsubsection*{Handle Model (per-process)}
+
+We use \textbf{per-process} handle tables for \emph{process}, \emph{thread}, and \emph{file} objects. A handle is a small integer returned to user mode; the kernel validates it on every system call and checks that it belongs to the \textbf{current process} and matches the \textbf{expected type}. This keeps isolation simple.
+
+\paragraph{Data structures (added headers).}
+We add the following definitions to a new header \lstinline|headers/um_handle_manager.h| and include it where needed. Embed the table into \lstinline|PROCESS| (see below).
+
+\begin{lstlisting}
+typedef enum _HANDLE_TYPE {
+    THREAD_HANDLE,
+    PROCESS_HANDLE,
+    FILE_HANDLE,
+    INVALID_HANDLE
+} HANDLE_TYPE;
+
+typedef struct _UM_HANDLE_ENTRY {
+    DWORD       HandleId;     // unique in owning process
+    HANDLE_TYPE Type;         // expected object class
+    PVOID       Object;       // PTHREAD / PPROCESS / PFILE_OBJECT
+    LONG        RefCount;     // for safe close
+    LIST_ENTRY  ListEntry;    // link inside per-process table
+} UM_HANDLE_ENTRY, *PUM_HANDLE_ENTRY;
+
+typedef struct _UM_HANDLE_TABLE {
+    LOCK        Lock;         // protects the table
+    LIST_ENTRY  Head;         // all UM_HANDLE_ENTRY items
+    DWORD       NextHandleId; // starts at 1
+} UM_HANDLE_TABLE, *PUM_HANDLE_TABLE;
+\end{lstlisting}
+
+\subsubsection*{Member in PROCESS (added field).}
+We add this to \lstinline|headers/executive/process_internal.h| inside the \lstinline|PROCESS| structure:
+
+\begin{lstlisting}
+UM_HANDLE_TABLE HandleTable;   // per-process handle table
+\end{lstlisting}
+
+\subsubsection*{Minimal handle manager (new source).}
+Provide a small manager with the signatures below. These are thin list/lock helpers used by all syscalls.
+
+\noindent \lstinline|STATUS UmHandleInitTable(PUM_HANDLE_TABLE T);| \newline
+\noindent \lstinline|void UmHandleUninitTable(PUM_HANDLE_TABLE T);| \newline
+\noindent \lstinline|STATUS UmHandleCreate(PUM_HANDLE_TABLE T, HANDLE_TYPE Type, PVOID Obj, DWORD* Out);| \newline
+\noindent \lstinline|STATUS UmHandleResolve(PUM_HANDLE_TABLE T, DWORD H, HANDLE_TYPE Expect, PVOID* OutObj);| \newline
+\noindent \lstinline|void UmHandleClose(PUM_HANDLE_TABLE T, DWORD H);| \newline
+
+\subsubsection*{Functions for System Calls for Process Management}
+
+Process syscalls create, resolve, and close \emph{per-process} handles. On any invalid handle, null/invalid pointer, or type mismatch, the handler returns an error.
 
 \begin{itemize}
     \item \lstinline|SyscallHandler()|: we update this function to include a new case in the switch statement for each newly implemented system call.
@@ -148,10 +194,9 @@ The following functions must be modified or implemented to complete this functio
     \item \lstinline|SyscallProcessCloseHandle()|: closes the process handle specified by \lstinline|ProcessHandle|, releasing any associated resources.
 \end{itemize}
 
-\subsection*{System Calls for File System Access}
+\subsubsection*{Functions for System Calls for File System Access}
 
-System calls for file system access allow applications to create, read, and manage files in user mode.  
-The following functions must be implemented to support these operations.
+File syscalls follow the same per-process handle pattern and use the kernel's I/O entry points.
 
 \begin{itemize}
     \item \lstinline|SyscallFileCreate()|: creates a new file in the file system.
@@ -162,15 +207,30 @@ The following functions must be implemented to support these operations.
 \subsection*{System Calls for Thread Management}
 Create the following new functions
 \begin{itemize}
- \item \textbf{SyscallThreadExit(Status):} Exist the currently running thread and handles resource cleanup. Notifies any waiting threads. Returns an exit status to the operating system.
+ \item \lstinline|SyscallThreadExit(Status)|: Exist the currently running thread and handles resource cleanup. Notifies any waiting threads. Returns an exit status to the operating system.
 
- \item \textbf{SyscallThreadCreate(ThreadHandle, Routine, Arg):} Create a new thread inside the current running process. The thread will begin executing \textit{Routine} using the given \textit{Arg}. A handle will be returned inside the \textit{ThreadHandle} pointer. Returns \textit{0} on success.
+ \item \lstinline|SyscallThreadCreate(ThreadHandle, Routine, Arg)|: Create a new thread inside the current running process. The thread will begin executing \textit{Routine} using the given \textit{Arg}. A handle will be returned inside the \textit{ThreadHandle} pointer. Returns \textit{0} on success.
 
- \item \textbf{SyscallThreadGetTid(ThreadHandle, ThreadId):} Get the TID for the given \textit{ThreadHandle} and store it inside \textit{ThreadId}.
+ \item \lstinline|SyscallThreadGetTid(ThreadHandle, ThreadId)|: Get the TID for the given \textit{ThreadHandle} and store it inside \textit{ThreadId}.
 
- \item \textbf{SyscallThreadWaitForTermination(ThreadHandle, Retval):} Wait for the termination of \textit{ThreadHandle}. Its return value will be stored inside the \textit{Retval} pointer.
+ \item \lstinline|SyscallThreadWaitForTermination(ThreadHandle, Retval)|: Wait for the termination of \textit{ThreadHandle}. Its return value will be stored inside the \textit{Retval} pointer.
 
- \item \textbf{SyscallThreadCloseHandle(ThreadHandle):} Close the handle associated with \textit{ThreadHandle}
+ \item \lstinline|SyscallThreadCloseHandle(ThreadHandle)|: Close the handle associated with \textit{ThreadHandle}
+ \end{itemize}
+
+
+\subsection*{System Calls for Thread Management}
+Create the following new functions
+\begin{itemize}
+ \item \lstinline|SyscallThreadExit(Status)|: Exist the currently running thread and handles resource cleanup. Notifies any waiting threads. Returns an exit status to the operating system.
+
+ \item \lstinline|SyscallThreadCreate(ThreadHandle, Routine, Arg)|: Create a new thread inside the current running process. The thread will begin executing \textit{Routine} using the given \textit{Arg}. A handle will be returned inside the \textit{ThreadHandle} pointer. Returns \textit{0} on success.
+
+ \item \lstinline|SyscallThreadGetTid(ThreadHandle, ThreadId)|: Get the TID for the given \textit{ThreadHandle} and store it inside \textit{ThreadId}.
+
+ \item \lstinline|SyscallThreadWaitForTermination(ThreadHandle, Retval)|: Wait for the termination of \textit{ThreadHandle}. Its return value will be stored inside the \textit{Retval} pointer.
+
+ \item \lstinline|SyscallThreadCloseHandle(ThreadHandle)|: Close the handle associated with \textit{ThreadHandle}
  \end{itemize}
 
 
@@ -186,7 +246,7 @@ The memory validation logic developed for argument passing ensures safe interact
 
 \subsection*{System Calls for Process Management}
 
-The system call handlers for process management interact with the Process Manager by invoking functions defined in \lstinline|process.h| and \lstinline|process.c|, such as \lstinline|ProcessCreate()|, \lstinline|ProcessWaitForTermination()|, \lstinline|ProcessGetId()|, and \lstinline|ProcessCloseHandle()|.
+The system call handlers for process management interact with the kernel functions for process management by invoking functions defined in \lstinline|process.h| and \lstinline|process.c|, such as \lstinline|ProcessCreate()|, \lstinline|ProcessWaitForTermination()|, \lstinline|ProcessGetId()|, and \lstinline|ProcessCloseHandle()|.
 
 \begin{itemize}
     \item \lstinline|SyscallProcessCreate()| will use \lstinline|ProcessCreate()| to create a new user-mode process from the specified executable file.
@@ -467,28 +527,27 @@ FUNCTION MmuIsBufferValid(Buffer, BufferSize, RightsRequested, Process) -> STATU
 \subsection*{System Calls for Process Management}
 
 \noindent\textbullet\ \lstinline|SyscallProcessCreate()| \newline
-We have to safely copy the strings into kernel memory after verifying all user-supplied pointers (for the path, arguments, and output handle).Next, we must resolve the entire path to the executable. Then, we ask the Process Manager to load this program. This provides us with a kernel process object if it is successful. This object has to be registered. To do this, we will create a new, distinct handle number, associate it with the kernel object in the private handle list of our process, and designate its type as HandleTypeProcess. The user is then written back this new handle.
+We first validate all user-supplied pointers (path, arguments, and output handle) across page boundaries and copy the strings into kernel memory. If the path is relative, we normalize it to the Applications folder on the system drive. We then ask the kernel loader to create the process, yielding a \lstinline|PPROCESS| on success. This object is registered in the \textbf{current process's} handle table by creating a new integer handle, associating it with the kernel object, and marking its type as \texttt{PROCESS}. The new handle is written back to user mode; any validation, normalization, or loader error is returned as a status code.
 
 \noindent\textbullet\ \lstinline|SyscallProcessWaitForTermination()| \newline
-We first verify that a user's handle is a HandleTypeProcess and that it is present in our handle list before allowing them to wait for another process.
-We employ the built-in wait mechanism of the kernel after it has been verified. Every process already has a "termination event". While we wait for this event, we shall put the calling thread to sleep. Until the target process exits, signaling the event and waking our thread, it will stay asleep. The final exit code is then obtained and given back to the user.
+We validate the output status pointer and then \textbf{resolve} the supplied handle in the \textbf{current process's} handle table under lock. We verify that the handle exists and that its type is \texttt{PROCESS}. After successful resolution, we use the kernel's wait mechanism on the target process's termination event, which blocks the calling thread until the process exits. We then obtain the final exit code and copy it back to the user. If the handle is not owned by the caller, is invalid, or has the wrong type, we fail the call without waiting.
 
 \noindent\textbullet\ \lstinline|SyscallProcessGetPid()| \newline
-There are two modalities for this call. The user is requesting their own process ID, which we obtain from the current process hierarchy, if they supply a unique "invalid" handle. We have to check the private handle list of our process if they supply a certain handle. Verifying that this handle's type is HandleTypeProcess and not a file, for instance is crucial. We obtain the ID of the target process and give it back to the user if the handle is legitimate and of the right kind.
+There are two modalities. If the user passes the sentinel \texttt{INVALID} handle, we return the PID of the \textbf{current} process from the process hierarchy. Otherwise, we resolve the given handle in the \textbf{current process's} handle table and verify that its type is \texttt{PROCESS}. If resolution and type check succeed, we obtain the PID of the target process and return it to the user; otherwise the call fails.
 
 \noindent\textbullet\ \lstinline|SyscallProcessCloseHandle()| \newline
-A user closes the handle of a process resource after they are done with it. Our handler will locate this handle in the private list of the process, verify its type, and then delete it. This "un-registers" the handle. Then, by "dereferencing" the object, we let the Process Manager know that we are no longer using it. This enables the kernel to release the object's memory if no one else is using it.
+A user closes a process handle they no longer need. We locate and resolve this handle in the \textbf{current process's} handle table, verify its type is \texttt{PROCESS}, then remove it from the table. We dereference the underlying kernel object so the kernel can reclaim it when the last reference is gone. If the handle is missing, not owned by the caller, or of the wrong type, we return an error.
 
 \subsection*{System Calls for File System Access}
 
 \noindent\textbullet\ \lstinline|SyscallFileCreate()| \newline
-A new file handle is assigned to the newly formed file or directory by this system call. To switch to kernel mode, the \lstinline|SyscallFileCreate()| method in \lstinline|syscall_if.c| invokes \lstinline|SyscallEntry()|. The internal \lstinline|FileCreate()| function in \lstinline|file_system.c| is called by the \lstinline|SyscallHandler| in the kernel, creating the file or directory and giving it a distinct file handle. The \lstinline|FileHandle| pointer is then used to return this handle to the user.
+We validate the path and output handle pointers and copy the path into kernel memory. For a relative path, we interpret it relative to the system drive root. The user-mode stub enters the kernel, where the \lstinline|SyscallHandler| invokes the internal \lstinline|IoCreateFile| to open or create the file/directory and return a kernel file object on success. We then create a new integer handle in the \textbf{current process's} handle table, associate it with the file object, mark the type as \texttt{FILE}, and return this handle to user mode. Validation, normalization, or open/create failures are returned as status codes.
 
 \noindent\textbullet\ \lstinline|SyscallFileRead()| \newline
-The kernel uses the file handle to access the associated file resource when the user calls \lstinline|SyscallFileRead()|. The kernel updates the BytesRead variable with the actual number of bytes read after reading the requested number of bytes from the file into the buffer. The handle guarantees that the file may be accessed safely and that the read operation can only be carried out by the person who opened the file.
+We validate the output buffer and \lstinline|BytesRead| pointers and check the requested size. We resolve the supplied handle in the \textbf{current process's} handle table and verify that its type is \texttt{FILE}. If resolution succeeds, the kernel reads up to the requested byte count into the user buffer using safe copy helpers and updates \lstinline|BytesRead| with the actual number of bytes read. Invalid, non-owned, or mistyped handles cause the call to fail.
 
 \noindent\textbullet\ \lstinline|SyscallFileClose()| \newline
-The file handle is sent to the kernel when the user invokes \lstinline|SyscallFileClose()|. Next, the kernel reduces the file handle's reference count after confirming that it is legitimate. The kernel shuts the file and releases the related resources if there are no further references to it. The FileClose function in \lstinline|file_system.c| accomplishes this.
+We pass the file handle to the kernel and remove it from the \textbf{current process's} handle table after verifying it is valid and of type \texttt{FILE}. We decrement the file object's reference count; when no references remain, the kernel closes the file and releases its resources. If the handle is invalid, not owned by the caller, or has the wrong type, the close fails with an error.
 
 \subsection*{System Calls for Thread Management}
 \subsubsection{Thread Management}
