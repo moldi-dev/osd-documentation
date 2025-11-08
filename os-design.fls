@@ -1062,6 +1062,10 @@ INPUT os-module-2-design.tex
 INPUT ./os-module-2-design.tex
 INPUT ./os-module-2-design.tex
 INPUT os-module-2-design.tex
+INPUT /usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
+INPUT /usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
+INPUT /usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
+INPUT /usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
 INPUT ./os-module-3-design.tex
 INPUT ./os-module-3-design.tex
 INPUT ./os-module-3-design.tex

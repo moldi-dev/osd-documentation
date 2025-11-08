@@ -1,4 +1,3 @@
-
 \chapter{Design of Module \textit{Userprog}}
 
 % ================================================================================= %
@@ -6,146 +5,677 @@
 
 \subsection{Initial Functionality}
 
-Describe in few words (one phrase) what you are starting from in your project. Even if this is something that we all know, it could be a good opportunity for you to be sure you really understand this aspect.
+\subsection*{Argument Passing}
+
+The existing HAL9000 implementation provides the essential functionalities for thread and process management needed to run user programs. However, it currently does not implement support for parsing program arguments and does not provide a mechanism to push those arguments onto the stack.
+
+\subsection*{Validation of System Call Arguments}
+
+When launching user programs that take arguments, the system only performs a simple validation to see if the buffer is usable or not. Because of this, invalid or unchecked input may cause the operating system to crash. Access-rights checking should also be extended to cover multiple pages.
+
+\subsection*{System Calls for Process Management}
+
+The fundamental logic for starting and ending processes is already provided by the kernel (such as the functions \lstinline|ProcessCreate()| and \lstinline|ProcessTerminate()|). However, the starting point only has a functional implementation for \newline \lstinline|SyscallProcessExit()| and nothing for closing a handle or creating, waiting for, or obtaining a process's ID.
+
+\subsection*{System Calls for File System Access}
+
+The starting point contains a partial implementation for the \lstinline|SyscallFileWrite()| function, without anything regarding file handling. We also do not have other functions regarding creating, reading and closing a file.
+
+\subsection*{System Calls for Thread Management}
+The current HAL9000 operating system provides only kernel-level functionality and lacks any meaningful interface for user programs to make requests from the operating system. User applications cannot perform essentialy basic operations such as accessing files, creating processes, or managing threads.
+
 
 \subsection{Requirements}
 
-Remove the following given official requirements and describe in few words (your own words) what you are requested to do in this part of your project. Even if this is something that we all know, it could be a good opportunity for you to be sure you really understand this aspect. 
+\subsection*{Argument Passing}
 
+Before starting a program, its command-line arguments must be pushed onto the user stack. This requires supporting multiple arguments, storing them as a null-terminated array of strings, and keeping the stack correctly aligned.
 
-The major requirements of the ``Userprog'' assignment, inspired from the original Pintos documentation, are the following:
+\subsection*{Validation of System Call Arguments}
+
+Here we must verify that all arguments passed by a user during a system call are valid. This includes checking that pointers and buffers are in user space, confirming buffer sizes to avoid overflows or illegal memory access, and ensuring the user has the necessary access rights.
+
+\subsection*{System Calls for Process Management}
+
+To enable user programs to generate, manage, and control processes within the operating system, system calls are necessary for process management.
+Creating processes (\lstinline|SyscallProcessCreate()|), waiting for processes to end \newline (\lstinline|SyscallProcessWaitForTermination()|), ending processes (\lstinline|SyscallProcessExit()|), obtaining process identifiers (\lstinline|SyscallProcessGetPid()|), and closing process handles (\lstinline|SyscallProcessCloseHandle()|) are all included in this.
+These system calls are crucial for controlling the lifetime of processes, guaranteeing correct execution, synchronization, and cleanup. To avoid resource leaks and preserve system stability, the implementation must also securely handle process-specific data, manage process isolation, and check inputs.
+
+\subsection*{System Calls for File System Access}
+
+System calls are necessary for file system access so that user programs can safely and effectively interact with files. This entails implementing functions for reading data from files (\lstinline|SyscallFileRead()|), closing file handles (\lstinline|SyscallFileClose()|), and creating or opening files (\lstinline|SyscallFileCreate()|). By managing file activities while maintaining data integrity, these system calls guarantee restricted access to file resources. To avoid resource leakage and guarantee system dependability, the implementation must also check inputs, preserve segregated access to file resources, and guarantee appropriate file handle management.
+
+\subsection*{System Calls for Thread Management}
+
 \begin{itemize}
-    \item \textit{System Calls for Process Management}. You have to implement the system calls \textit{SyscallProcessExit()}, \textit{SyscallProcessCreate()}, \textit{SyscallProcessGetPid()}, \textit{SyscallProcessWaitForTermination()} and \textit{SyscallProcessCloseHandle()}.
-
-    \item \textit{System Calls for Thread Management}. You have to implement the system calls \textit{SyscallThreadExit()}, \textit{SyscallThreadCreate()}, \textit{SyscallThreadGetTid()}, \textit{SyscallThreadWaitForTermination()} and \textit{SyscallThreadCloseHandle()}.
-
-    \item \textit{Program Argument Passing}. You have to change new process creation, such that the program arguments to be passed on its user-space stack.
-    
-    \item \textit{System Calls for File System Access}. You have to implement system calls for opening existing files or creating new files (\textit{SyscallFileCreate()}), reading data from a file \textit{SyscallFileRead()} and closing a file \textit{SyscallFileClose()}).
+    \item Implement the system calls \textit{SyscallThreadExit()}, \textit{SyscallThreadCreate()}, \textit{SyscallThreadGetTid()}, \textit{SyscallThreadWaitForTermination()} and \textit{SyscallThreadCloseHandle()}.
 \end{itemize}
-
-Some additional (and optional) requirements of the ``Userprog'' assignment, specific to UTCN / CS OSD course could be: 
-\begin{itemize}
-    \item \textit{IPC mechanisms}. You have to add in-kernel support for IPC mechanisms (pipes, shared memory) and the corresponding system calls (also including synchronization mechanisms) for user applications.
-    
-    \item \textit{Dynamic Memory Allocation Support}. Add in kernel support for mapping new areas in the application's virtual address space and also support managing dynamically allocated memory and corresponding system calls.
-    
-    \item \textit{Code Sharing Support}. Add support for sharing common code of different processes.
-   
-%     \item  \textit{Dynamically Linking Libraries}. 
-%     \item \textit{Copy-on-Write}
-\end{itemize}
-
-
-The way to allocate requirements on member teams. 
-\begin{itemize}
-    \item 3-members teams
-        \begin{enumerate}
-            \item argument passing + validation of system call arguments (pointers)
-            
-            \item system calls for process management + file system access
-            
-            \item system calls for thread management
-            
-        \end{enumerate}
-
-    \item 4-members teams (exceptional cases)
-        \begin{enumerate}
-            \item argument passing + validation of system call arguments (pointers)
-            
-            \item system calls for process management + file system access
-            
-            \item system calls for thread management
-            
-            \item IPC mechanisms
-        \end{enumerate}
-
-     \item optional subjects (for extra points)
-        \begin{itemize}
-            \item code memory sharing support
-            \item dynamic memory allocation support
-        \end{itemize}
-
-\end{itemize}
-
 
 \subsection{Basic Use Cases}
 
-Try to describe a real-life situation, where the requested OS functionality could be useful in a user-application or for a human being. This is also an opportunity for you to better understand what the requirements are and what are they good for. A simple use-case could be enough, if you cannot find more or do not have enough time to describe them.
+\subsection*{Argument Passing}
+With argument passing, users can type input in the command line to change how a program runs. It lets them set different values or options without editing the program itself.
 
+\subsection*{Validation of System Call Arguments}
+
+The purpose of the validation is to protect the kernel from malicious attempts to access restricted memory or exploit buffer overflows that could reach kernel space
+
+\subsection*{System Calls for Process Management}
+
+It may be necessary for a user application to run a process that performs a specific task, such as generating code or carrying out a computation, and then obtain the result once the process has finished. To do this, the application starts a new process by calling \lstinline|SyscallProcessCreate()|. After creation, it may call \lstinline|SyscallProcessGetPid()| to retrieve the process identifier for tracking or logging purposes. The program then uses \lstinline|SyscallProcessWaitForTermination()| to wait until the process completes, while the running process itself calls \lstinline|SyscallProcessExit()| to signal that it has finished execution. Finally, once the process ends, the application calls \lstinline|SyscallProcessCloseHandle()| to release the handle and free any associated resources, ensuring proper cleanup and efficient process management
+
+\subsection*{System Calls for File System Access}
+
+In order to load configuration settings or process user input, a user application may need to read data from a file. In order to accomplish this, the program will open or create the file by calling \lstinline|SyscallFileCreate()|. The application will use \lstinline|SyscallFileRead()| to retrieve data from the file when it has been opened. This may involve reading binary data or lines of text. For writing, the application will call \lstinline|SyscallFileWrite()|. In the end, the application will call \lstinline|SyscallFileClose()| to shut the file and release the related resources after the read process is complete. This guarantees effective resource management and correct file access.
+
+\subsection*{System Calls for Thread Management}
+
+\textbf{File Editing:} A basic text editor requires access to the file system in order to create and update files. Various essential commands such as \texttt{ls}, \texttt{touch}, and \texttt{rm} require access to the file system.
+
+\textbf{Build System:} A compilation tool like \texttt{make} needs to compile multiple source files in parallel to reduce build time. It uses system calls to spawn compiler processes for independent files, passes command-line arguments specifying input files and compiler flags, and uses wait operations to synchronize completion before linking.
 
 % ================================================================================= %
 \section{Design Description}
 
 \subsection{Needed Data Structures and Functions}
 
-This should be an overview of needed data structure and functions you have to use or add for satisfying the requirements. How the mentioned data structures and functions would be used, must be described in the next subsection ``Detailed Functionality''.
+\subsection*{Argument Passing}
+
+Functions that need to be updated: In \lstinline|thread.c| we will modify:
+
+\begin{itemize}
+    \item \lstinline|ThreadSetupMainThreadUserStack()|:
+    This function must be updated so it can extract the arguments from the
+    \lstinline|PROCESS| structure and correctly push them onto the
+    \lstinline|USER STACK| in the proper order.
+\end{itemize}
+
+We also need to introduce a new data structure to manage the user stack.
+This will give us a clean and organized way to interact with the user-mode stack.
+
+\begin{lstlisting}
+struct _USER_STACK
+{
+    PVOID   StackPointer;
+    QWORD   StackSize;
+    char**  argv;
+    QWORD   argc;
+    PVOID   Reserved;
+} USER_STACK, *PUSER_STACK;
+\end{lstlisting}
+Since multiple data types will be pushed onto the stack, and we want the code to remain readable instead of placing everything in one location, it is useful to create helper functions that push different types of values onto the user stack. We will implement the following helper functions:
+
+\begin{itemize}
+
+\item \lstinline|StackPushString()|: pushes a null-terminated string onto the user stack.
+
+\item \lstinline|StackPushInt()|: pushes an integer value onto the user stack.
+
+\item \lstinline|StackPushPointer()|: stores a pointer value onto the user stack.
+
+\end{itemize}
+
+\subsection*{Validation of System Call Arguments}
+
+In this section, we will extend the behavior of some existing functions and
+introduce new logic to validate arguments passed to a system call.
+
+Functions to be updated:
+
+\begin{itemize}
+
+\item \lstinline|MmuIsBufferValid()|: currently verifies buffer validity,
+but must be enhanced to check all memory pages that the buffer spans.
+
+\item \lstinline|CmmIsBufferValid()|: must also be modified so it iterates
+through every page occupied by the buffer.
+
+\end{itemize}
+
+\subsection*{System Calls for Process Management}
+
+The process management system calls enable user-mode applications to create, control, and synchronize processes effectively.  
+The following functions must be modified or implemented to complete this functionality.
+
+\begin{itemize}
+    \item \lstinline|SyscallHandler()|: we update this function to include a new case in the switch statement for each newly implemented system call.
+\end{itemize}
+
+\begin{itemize}
+    \item \lstinline|SyscallProcessCreate()|: creates a new process that executes the code specified by the \lstinline|FilePath| parameter, using the provided \lstinline|Arguments|.
+    \item \lstinline|SyscallProcessWaitForTermination()|: blocks the calling thread until the process identified by \lstinline|ProcessHandle| has finished execution.
+    \item \lstinline|SyscallProcessGetPid()|: retrieves the unique process identifier (PID) associated with a given process.
+    \item \lstinline|SyscallProcessCloseHandle()|: closes the process handle specified by \lstinline|ProcessHandle|, releasing any associated resources.
+\end{itemize}
+
+\subsection*{System Calls for File System Access}
+
+System calls for file system access allow applications to create, read, and manage files in user mode.  
+The following functions must be implemented to support these operations.
+
+\begin{itemize}
+    \item \lstinline|SyscallFileCreate()|: creates a new file in the file system.
+    \item \lstinline|SyscallFileRead()|: reads the contents of a file and stores the data in a buffer for later processing.
+    \item \lstinline|SyscallFileClose()|: closes an open file and releases the associated system resources.
+\end{itemize}
+
+\subsection*{System Calls for Thread Management}
+Create the following new functions
+\begin{itemize}
+ \item \textbf{SyscallThreadExit(Status):} Exist the currently running thread and handles resource cleanup. Notifies any waiting threads. Returns an exit status to the operating system.
+
+ \item \textbf{SyscallThreadCreate(ThreadHandle, Routine, Arg):} Create a new thread inside the current running process. The thread will begin executing \textit{Routine} using the given \textit{Arg}. A handle will be returned inside the \textit{ThreadHandle} pointer. Returns \textit{0} on success.
+
+ \item \textbf{SyscallThreadGetTid(ThreadHandle, ThreadId):} Get the TID for the given \textit{ThreadHandle} and store it inside \textit{ThreadId}.
+
+ \item \textbf{SyscallThreadWaitForTermination(ThreadHandle, Retval):} Wait for the termination of \textit{ThreadHandle}. Its return value will be stored inside the \textit{Retval} pointer.
+
+ \item \textbf{SyscallThreadCloseHandle(ThreadHandle):} Close the handle associated with \textit{ThreadHandle}
+ \end{itemize}
 
 
 \subsection{Interfaces Between Components}
 
-In this section you must describe the identified interference of your component(s) with the other components (existing or developed by you) in the project. You do not have to get in many details (which go into the next section), but must specify the possible inter-component interactions and specify the existing functions you must use or existing functions you propose for handling such interactions. 
+\subsubsection*{Argument Passing and Validation of System Call Arguments}
+
+\textbf{Pointer Validation:}
+Argument passing introduces a function to verify pointers supplied by user programs. This function ensures that arguments passed from user space reference valid, properly aligned memory regions.Thread and process management system calls reuse this pointer validation logic to check user-provided pointers such as thread entry addresses, context values,and other parameters.
+
+\textbf{Memory Safety:}
+The memory validation logic developed for argument passing ensures safe interaction with user memory, preventing kernel crashes or privilege violations. This functionality is also used in thread management when working with user-space arguments or initializing new thread contexts.
+
+\subsection*{System Calls for Process Management}
+
+The system call handlers for process management interact with the Process Manager by invoking functions defined in \lstinline|process.h| and \lstinline|process.c|, such as \lstinline|ProcessCreate()|, \lstinline|ProcessWaitForTermination()|, \lstinline|ProcessGetId()|, and \lstinline|ProcessCloseHandle()|.
+
+\begin{itemize}
+    \item \lstinline|SyscallProcessCreate()| will use \lstinline|ProcessCreate()| to create a new user-mode process from the specified executable file.
+    \item \lstinline|SyscallProcessWaitForTermination()| will use \lstinline|ProcessWaitForTermination()| to suspend the current thread until the target process has exited.
+    \item \lstinline|SyscallProcessGetPid()| will use \lstinline|ProcessGetId()| to obtain the unique identifier (PID) of a process.
+    \item \lstinline|SyscallProcessCloseHandle()| will use \lstinline|ProcessCloseHandle()| to release the reference to a process resource.
+    \item \lstinline|SyscallProcessExit()| will use the existing \lstinline|ProcessTerminate()| function to stop the currently running process.
+\end{itemize}
+
+\subsection*{System Calls for File System Access}
+
+The system call handlers for file system access interface with the I/O Manager by calling functions defined in \lstinline|io.h| and \lstinline|io_files.c|, such as \lstinline|IoCreateFile()|, \lstinline|IoReadFile()|, and \lstinline|IoCloseFile()|.
+
+\begin{itemize}
+    \item \lstinline|SyscallFileCreate()| will use \lstinline|IoCreateFile()| to create a new file when requested by a user process.
+    \item \lstinline|SyscallFileRead()| will use \lstinline|IoReadFile()| to read data from a file and store it into a buffer for later processing.
+    \item \lstinline|SyscallFileClose()| will use \lstinline|IoCloseFile()| to close an open file and release the associated data and resources.
+\end{itemize}
+
+\subsection*{System Calls for Thread Management}
+
+\subsubsection{Handle Management:}
+Processes and threads will use the same data structure implementation for managing handles. Processes will use a global structure, while threads will use a per-process structrue.
+
+A process must ensure that all its threads are cleaned up, before terminating itself.
+
+\subsubsection{Synchronization:}
+Processes and threads will both use kernel events for synchronization.
 
 
 \subsection{Analysis and Detailed Functionality}
 
-Here is where you must describe detailed of your design strategy, like the way the mentioned data structures are used, the way the mentioned functions are implemented and the implied algorithms. 
+\subsection*{Design Strategy (Argument Passing)}
 
-This must be the main and the most consistent part of your design document.
+\paragraph{Goal.}
+Argument passing prepares a fresh user stack so that \lstinline|main(int argc, char** argv)| sees the expected inputs. In HAL9000 this work is driven by \lstinline|_ThreadSetupMainThreadUserStack()|: it parses the command line, copies the strings to the user stack, builds the \lstinline|argv| pointer array, and finally places \lstinline|argc| and \lstinline|argv| on the stack with the proper ABI alignment.
 
-It very important to have a coherent and clear story (text) here, yet do not forget to put it, when the case in a technical form. So, for instance, when you want to describe an algorithm or the steps a function must take, it would be of real help for your design reader (understand your teacher) to see it as a pseudo-code (see an example below) or at least as an enumerated list. This way, could be easier to see the implied steps and their order, so to better understand your proposed solution.
+\paragraph{Inputs and context.}
+The function reads the raw command line and argument count from the \lstinline|PROCESS| object
+(\lstinline|FullCommandLine| and \lstinline|NumberOfArguments|). Because the kernel cannot write directly into a new process’s stack, it acquires a temporary kernel mapping with \lstinline|MmuGetSystemVirtualAddressForUserBuffer()| and releases it with \lstinline|MmuFreeSystemVirtualAddressForUserBuffer()| once setup is complete.
+
+\paragraph{Working state.}
+We track stack construction through \lstinline|_USER_STACK| (fields: \lstinline|StackPointer|, \lstinline|StackSize|, \lstinline|argc|, \lstinline|argv|, and \lstinline|Reserved|). As bytes and pointers are pushed, \lstinline|StackPointer| is updated so that layout, alignment, and shadow space are honored.
+
+\paragraph{Placement order.}
+Strings are copied first (last argument to first) using \lstinline|OnStackPushString()| so their bytes become contiguous at lower addresses. Then we emit the \lstinline|argv| array by pushing the addresses of those strings in reverse order via \lstinline|OnStackPushPointer()|. Finally, we place \lstinline|argc| with \lstinline|OnStackPushInt()| and the \lstinline|argv| base pointer with \lstinline|OnStackPushPointer()|, after enforcing stack alignment and reserving any required shadow space and a dummy return address.
+
+\bigskip
+% --- Pseudocode ---
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\itshape,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single
+}
+\begin{lstlisting}[language={}]
+// Build initial user-mode stack for the process's main thread.
+// Returns STATUS and the resulting user-mode stack pointer.
+FUNCTION _ThreadSetupMainThreadUserStack(
+    IN  PVOID     InitialStack,
+    OUT PVOID*    ResultingStack,
+    IN  PPROCESS  Process
+) -> STATUS
+{
+    STATUS     status = SUCCESS
+    USER_STACK userStack = {0}
+    PVOID      KernelStackAddress = NULL
+
+    // Initialize tracking state.
+    userStack.StackPointer = InitialStack
+    userStack.StackSize    = DEFAULT_STACK_SIZE
+    userStack.argv         = NULL
+    userStack.argc         = Process->NumberOfArguments
+    userStack.Reserved     = NULL
+
+    // Map the user stack into kernel space so we can write to it.
+    KernelStackAddress =
+        MmuGetSystemVirtualAddressForUserBuffer(
+            userStack.StackPointer,
+            userStack.StackSize,
+            WRITE_ACCESS,
+            Process)
+
+    IF (KernelStackAddress == NULL) THEN
+        RETURN MEMORY_ERROR
+    ENDIF
+
+    // Parse the command line into tokens (equivalent to using strchr/strtok).
+    ARG_LIST args = SplitCommandLine(Process->FullCommandLine)
+
+    // 1) Copy argument strings onto the stack, from last to first.
+    //    Record each string's user-mode address for argv[].
+    VECTOR<PVOID> ArgAddrs = EMPTY
+    FOR i FROM args.count-1 DOWNTO 0 DO
+        PVOID strUserAddr = NULL
+        userStack.StackPointer =
+            OnStackPushString(
+                KernelStackAddress,
+                userStack.StackPointer,
+                args[i],
+                &strUserAddr)
+        ArgAddrs.PUSH_FRONT(strUserAddr)   // keep argv[0]..argv[n-1]
+    END FOR
+
+    // 2) Enforce ABI alignment (e.g., 16-byte).
+    userStack.StackPointer =
+        AlignDown(userStack.StackPointer, ABI_STACK_ALIGN)
+
+    // 3) Reserve shadow space if required by the calling convention.
+    userStack.StackPointer =
+        ReserveShadowSpace(KernelStackAddress,
+                           userStack.StackPointer,
+                           SHADOW_SPACE_BYTES)
+
+    // 4) Build argv[] by pushing pointers in reverse order.
+    FOR j FROM ArgAddrs.count-1 DOWNTO 0 DO
+        userStack.StackPointer =
+            OnStackPushPointer(
+                KernelStackAddress,
+                userStack.StackPointer,
+                ArgAddrs[j])
+    END FOR
+    PVOID argvBase = UserAddressOf(KernelStackAddress, userStack.StackPointer)
+
+    // 5) Push argc and argv.
+    userStack.StackPointer =
+        OnStackPushInt(KernelStackAddress, userStack.StackPointer, (UINT64)userStack.argc)
+    userStack.StackPointer =
+        OnStackPushPointer(KernelStackAddress, userStack.StackPointer, argvBase)
+
+    // 6) Push a synthetic return address (convention-specific).
+    userStack.StackPointer =
+        OnStackPushPointer(KernelStackAddress, userStack.StackPointer, FAKE_RETURN_ADDRESS)
+
+    // Done: return final SP and drop the temporary mapping.
+    *ResultingStack = userStack.StackPointer
+    MmuFreeSystemVirtualAddressForUserBuffer(KernelStackAddress)
+    RETURN status
+}
+
+//Helpers
+
+// Push a null-terminated string; return updated SP and out its user address.
+FUNCTION OnStackPushString(
+    IN  PVOID  KernelStackAddress,
+    IN  PVOID  StackPointer,
+    IN  STRING String,
+    OUT PVOID* OutUserAddress
+) -> PVOID
+{
+    SIZE len = ByteLen(String) + 1        // include '\0'
+    SIZE padded = AlignUp(len, 8)
+    PVOID newSP = (PVOID)((UINTPTR)StackPointer - padded)
+
+    MEMCOPY((BYTE*)KernelStackAddress + OffsetOf(newSP), String, len)
+    MEMSET ((BYTE*)KernelStackAddress + OffsetOf(newSP) + len, 0, padded - len)
+
+    *OutUserAddress = UserAddressOf(KernelStackAddress, newSP)
+    RETURN newSP
+}
+
+FUNCTION OnStackPushInt(
+    IN PVOID KernelStackAddress,
+    IN PVOID StackPointer,
+    IN UINT64 Value
+) -> PVOID
+{
+    PVOID newSP = (PVOID)((UINTPTR)StackPointer - SIZEOF(UINT64))
+    WRITE64((BYTE*)KernelStackAddress + OffsetOf(newSP), Value)
+    RETURN newSP
+}
+
+FUNCTION OnStackPushPointer(
+    IN PVOID KernelStackAddress,
+    IN PVOID StackPointer,
+    IN PVOID Pointer
+) -> PVOID
+{
+    PVOID newSP = (PVOID)((UINTPTR)StackPointer - SIZEOF(PVOID))
+    WRITEPTR((BYTE*)KernelStackAddress + OffsetOf(newSP), Pointer)
+    RETURN newSP
+}
+
+// Reserve raw bytes (e.g., shadow space or padding) and return the new SP.
+FUNCTION ReserveShadowSpace(
+    IN PVOID KernelStackAddress,
+    IN PVOID StackPointer,
+    IN SIZE  Bytes
+) -> PVOID
+{
+    (void)KernelStackAddress  // not used; kept for symmetry
+    RETURN (PVOID)((UINTPTR)StackPointer - AlignUp(Bytes, ABI_STACK_ALIGN))
+}
+\end{lstlisting}
+
+\subsection*{System Call Argument Validation}
+
+\paragraph{Overview.}
+Before the kernel can safely serve a system call, every argument supplied by a user process must be validated. The OS receives pointers and buffers from user space, and it must confirm that each one points to accessible, valid, and properly permissioned memory. Without strict checking, a malicious or faulty program could crash the kernel or access privileged memory.
+
+\paragraph{Current State.}
+HAL9000 already performs basic checks: it ensures the buffer is not \lstinline|NULL|, verifies that it does not point into kernel space, and confirms access permissions for the region. These checks are handled via \lstinline|MmuIsBufferValid()|, which in turn calls into \lstinline|VmmIsBufferValid()| and \lstinline|VmReservationReturnRightsForAddress()|.  
+
+However, the current implementation only evaluates the first region of memory. If a buffer spans more than one page or crosses reservation boundaries, only the initial portion is checked, which leaves open a possibility for unsafe memory access.
+
+\paragraph{Required Improvement.}
+To strengthen validation, the system must iterate through all pages covered by the buffer. Each page may hold different rights, so every segment must pass security checks. This guarantees that a buffer partially mapping to valid memory and partially into protected memory cannot slip through.
+
+\paragraph{Permission and String Handling.}
+The validation function must also handle strings carefully. When a string buffer is provided, it must:
+\begin{itemize}
+\item end with a \lstinline|\0| byte,
+\item remain within its allocated region,
+\item not run into unmapped memory.
+\end{itemize}
+If the string is not properly terminated or exceeds its bounds, the system call should fail immediately to prevent memory corruption or leaks.
+
+\paragraph{Execution Flow.}
+The enhanced \lstinline|MmuIsBufferValid()| performs initial pointer checks, verifies that the address belongs to user space, determines how many pages the buffer covers, and walks through each one using \lstinline|VmmIsBufferValid()|. If any checked segment fails, the function exits with an error and the system call does not continue.
+
+This approach ensures full memory validation without unnecessary overhead, maintaining both correctness and system security.
+
+\begin{lstlisting}[language={},frame=single,basicstyle=\ttfamily\small,keywordstyle=\color{blue}]
+FUNCTION MmuIsBufferValid(Buffer, BufferSize, RightsRequested, Process) -> STATUS
+{
+    // Reject any kernel memory access attempt
+    IF Buffer IN KERNEL_SPACE THEN
+        RETURN STATUS_MEMORY_PREVENTS_USERMODE_ACCESS
+    ENDIF
+
+    // Validate each page touched by the buffer
+    FOR page FROM Buffer TO (Buffer + BufferSize) STEP PAGE_SIZE DO
+        status = VmmIsBufferValid(
+                     page,
+                     PAGE_SIZE,
+                     RightsRequested,
+                     Process.VaSpace,
+                     Process.PagingData.KernelSpace)
+        IF status IS NOT SUCCESS THEN
+            RETURN status
+        ENDIF
+    END FOR
+
+    // Final full-range permission verification
+    status = VmmIsBufferValid(
+                 Buffer,
+                 BufferSize,
+                 RightsRequested,
+                 Process.VaSpace,
+                 Process.PagingData.KernelSpace)
+    IF status IS NOT SUCCESS THEN
+        RETURN status
+    ENDIF
+
+    // Additional checks for string buffers (read access)
+    IF RightsRequested INCLUDES READ_ACCESS THEN
+        hasNull = FALSE
+
+        FOR offset FROM 0 TO BufferSize DO
+            IF *(Buffer + offset) == '\0' THEN
+                hasNull = TRUE
+                BREAK
+            ENDIF
+        END FOR
+
+        IF hasNull == FALSE THEN
+            RETURN STATUS_STRING_TOO_LONG   // no terminator found
+        ENDIF
+    ENDIF
+
+    RETURN STATUS_SUCCESS
+}
+\end{lstlisting}
+
+\subsection*{System Calls for Process Management}
+
+\noindent\textbullet\ \lstinline|SyscallProcessCreate()| \newline
+We have to safely copy the strings into kernel memory after verifying all user-supplied pointers (for the path, arguments, and output handle).Next, we must resolve the entire path to the executable. Then, we ask the Process Manager to load this program. This provides us with a kernel process object if it is successful. This object has to be registered. To do this, we will create a new, distinct handle number, associate it with the kernel object in the private handle list of our process, and designate its type as HandleTypeProcess. The user is then written back this new handle.
+
+\noindent\textbullet\ \lstinline|SyscallProcessWaitForTermination()| \newline
+We first verify that a user's handle is a HandleTypeProcess and that it is present in our handle list before allowing them to wait for another process.
+We employ the built-in wait mechanism of the kernel after it has been verified. Every process already has a "termination event". While we wait for this event, we shall put the calling thread to sleep. Until the target process exits, signaling the event and waking our thread, it will stay asleep. The final exit code is then obtained and given back to the user.
+
+\noindent\textbullet\ \lstinline|SyscallProcessGetPid()| \newline
+There are two modalities for this call. The user is requesting their own process ID, which we obtain from the current process hierarchy, if they supply a unique "invalid" handle. We have to check the private handle list of our process if they supply a certain handle. Verifying that this handle's type is HandleTypeProcess and not a file, for instance is crucial. We obtain the ID of the target process and give it back to the user if the handle is legitimate and of the right kind.
+
+\noindent\textbullet\ \lstinline|SyscallProcessCloseHandle()| \newline
+A user closes the handle of a process resource after they are done with it. Our handler will locate this handle in the private list of the process, verify its type, and then delete it. This "un-registers" the handle. Then, by "dereferencing" the object, we let the Process Manager know that we are no longer using it. This enables the kernel to release the object's memory if no one else is using it.
+
+\subsection*{System Calls for File System Access}
+
+\noindent\textbullet\ \lstinline|SyscallFileCreate()| \newline
+A new file handle is assigned to the newly formed file or directory by this system call. To switch to kernel mode, the \lstinline|SyscallFileCreate()| method in \lstinline|syscall_if.c| invokes \lstinline|SyscallEntry()|. The internal \lstinline|FileCreate()| function in \lstinline|file_system.c| is called by the \lstinline|SyscallHandler| in the kernel, creating the file or directory and giving it a distinct file handle. The \lstinline|FileHandle| pointer is then used to return this handle to the user.
+
+\noindent\textbullet\ \lstinline|SyscallFileRead()| \newline
+The kernel uses the file handle to access the associated file resource when the user calls \lstinline|SyscallFileRead()|. The kernel updates the BytesRead variable with the actual number of bytes read after reading the requested number of bytes from the file into the buffer. The handle guarantees that the file may be accessed safely and that the read operation can only be carried out by the person who opened the file.
+
+\noindent\textbullet\ \lstinline|SyscallFileClose()| \newline
+The file handle is sent to the kernel when the user invokes \lstinline|SyscallFileClose()|. Next, the kernel reduces the file handle's reference count after confirming that it is legitimate. The kernel shuts the file and releases the related resources if there are no further references to it. The FileClose function in \lstinline|file_system.c| accomplishes this.
+
+\subsection*{System Calls for Thread Management}
+\subsubsection{Thread Management}
+
+\begin{lstlisting}
+ SyscallThreadExit (
+    IN STATUS Status
+ )
+\end{lstlisting}
+
+The \lstinline{SyscallThreadExit} allows a thread to gracefully terminate its execution. The \lstinline{Status} will be forwarded to other threads waiting for this termination. Firstly, we must swith to kernel mode and then call \lstinline{ThreadExit} using the \lstinline{SyscallHandler}. Inside \lstinline{ThreadExit} we must set the \lstinline{Status} and signal to other threads waiting. The handle associated with this thread is removed from the process' handle table, and finally, the execution is passed to a new thread by calling the scheduler.
 
 
-\subsection{Explanation of Your Design Decisions}
 
-This section is needed, only if you feel extra explanations could be useful in relation to your designed solution. For instance, if you had more alternative, but you chose one of them (which you described in the previous sections), here is where you can explain the reasons of your choice (which could be performance, algorithm complexity, time restrictions or simply your personal preference for the chosen solution). Though, try to keep it short. 
+\begin{lstlisting}
+ SyscallThreadCreate(
+    OUT    UM_HANDLE* ThreadHandle,
+    IN     PFUNC_ThreadStart Routine,
+    IN_OPT PVOID Arg
+ )
+\end{lstlisting}
 
-If you had no extra explanation, this section could be omitted at all. 
+The \lstinline{SyscallThreadCreate} allows for the creation of a new thread within the current running process. A \lstinline{Routine} and \lstinline{Arg} are given, and a \lstinline{ThreadHandle} is returned.
+
+Simmilarly to the previous syscall, we first switch to kernel mode, before calling \lstinline{ThreadCreateEx}. After creating the thread, we generate a new handle and store it within the current running process.
+
+
+
+\begin{lstlisting}
+ SyscallThreadGetTid(
+    IN_OPT UM_HANDLE ThreadHandle,
+    OUT    TID* ThreadId
+ )
+\end{lstlisting}
+
+Retrieve the Thread ID associated to the given \lstinline{ThreadHandle}. If \lstinline{ThreadHandle} is not provided, return the TID of the current running thread.
+
+After switching to kernel mode, iterate through the process' handle list until finding the handle we are searching for. Afterwards, return the associated TID.
+
+
+
+\begin{lstlisting}
+ SyscallThreadWaitForTermination(
+    IN     UM_HANDLE ThreadHandle,
+    OUT    STATUS* Retval
+ )
+\end{lstlisting}
+
+The \lstinline{SyscallThreadWaitForTermination} allows for synchronization between threads. The currently running thread will pause its execution until the thread associated with \lstinline{ThreadHandle} terminates. The return value is stored inside \lstinline{Retval}.
+
+After switching to kernel mode, use synchronization primitives, such as \lstinline{ExEvenWaitForSignal} to block the current thread until \lstinline{ThreadHandle} finished execution. Afterwards, copy the target thread's \lstinline{Status} inside \lstinline{Retval}.
+
+
+
+\begin{lstlisting}
+ SyscallThreadCloseHandle(
+    IN     UM_HANDLE ThreadHandle,
+ )
+\end{lstlisting}
+
+Clean up thread handles and release all associated resources if no thread is waiting for \lstinline{ThreadHandle}.
+
+Switch to kernel mode, find \lstinline{ThreadHandle} inside the process' handle list, and decrement the reference count. If the reference count reaches zero, call \lstinline{_ThreadDestroy} and remove the handle from the list.
 
 % ================================================================================= %
 \section{Tests}
 
-Your are given in your \OSName{} the tests your solution will be checked against and evaluated and you are not required to develop any addition test. Though, even if the tests are known, it would be helpful for you during the design phase to take a look at the given tests, because that way you can check if your design covers all of them. It would be sufficient for most of tests to just read the comments describing them.
+\subsection*{Argument Passing Tests}
 
-In this section you have to list the tests affecting your design and given a short description of each one (using you own words).
+\begin{itemize}
+
+\item \lstinline|TestUserArgsNone|: Ensures a program runs correctly with no
+arguments. In this case, \lstinline|argc = 0| and \lstinline|argv| includes only a
+single \lstinline|NULL| entry.
+
+\item \lstinline|TestUserArgsOne|: Validates proper handling of a single
+argument. \lstinline|argc = 1| and \lstinline|argv| contains two entries:
+\lstinline|argv[0]| pointing to the argument string, and \lstinline|argv[1] = NULL|.
+
+\item \lstinline|TestUserArgsMany|: Checks correct processing of several
+arguments, verifying that parsing and population of the \lstinline|argv| array are
+handled accurately.
+
+\item \lstinline|TestUserArgsAll|: Executes a stress test by supplying a
+large number of arguments, confirming stable and correct argument handling
+under heavy input conditions.
+
+\end{itemize}
+
+\subsection*{Validation of System Call Arguments - Bad Actions}
+
+These tests verify that the OS rejects illegal memory accesses and unauthorized privileged operations from user programs.
+
+\begin{itemize}
+
+\item \lstinline|BadJumpKernel|: Checks system behavior if a user attempts to execute code in kernel memory.
+
+\item \lstinline|BadJumpNoncanonical|: Ensures an attempted jump to a non-canonical address triggers the correct fault.
+
+\item \lstinline|BadJumpNull|: Verifies system response when execution is attempted at a \lstinline|NULL| pointer.
+
+\item \lstinline|BadReadIoPort|: Confirms that I/O privilege restrictions are enforced by attempting to read from I/O ports.
+
+\item \lstinline|BadReadKernel|: Ensures user code cannot read from kernel memory.
+
+\item \lstinline|BadReadMsr|: Validates that reading from privileged MSR registers is blocked.
+
+\item \lstinline|BadReadNonCanonical|: Tests behavior when reading from a non-canonical virtual address.
+
+\item \lstinline|BadReadNull|: Checks that reading from \lstinline|NULL| is properly handled.
+
+\item \lstinline|BadWriteIoPort|: Verifies that writing to protected I/O ports is blocked.
+
+\item \lstinline|BadWriteKernel|: Ensures attempts to write into kernel memory fail correctly.
+
+\item \lstinline|BadWriteMsr|: Confirms that writing to MSR registers is disallowed.
+
+\item \lstinline|BadWriteNonCanonical|: Ensures invalid writes to non-canonical addresses trigger a fault.
+
+\item \lstinline|BadWriteNull|: Validates system handling of writes to \lstinline|NULL| memory.
+
+\end{itemize}
+
+\subsection*{System Calls for Process Management}
+
+These tests validate the correctness and robustness of process management system calls and the handle management subsystem.
+
+\begin{itemize}
+    \item \lstinline|ProcessCloseFile|: Validates type safety. Attempts to close a valid file handle using \lstinline|SyscallProcessCloseHandle()|. The system must detect the wrong handle type and return an error.
+    \item \lstinline|ProcessCloseNormal|: Confirms that a valid process handle can be successfully closed, properly decrementing the kernel object's reference count.
+    \item \lstinline|ProcessCloseParentHandle|: Ensures that a child process cannot close a handle belonging to its parent.
+    \item \lstinline|ProcessCloseTwice|: Checks robustness. The first close should succeed, and a second close on the same handle must fail.
+    \item \lstinline|ProcessCreateBadPointer|: Validates argument safety by calling \lstinline|SyscallProcessCreate()| with an invalid pointer. The kernel must fail safely without crashing.
+    \item \lstinline|ProcessCreateMissingFile|: Attempts to create a process from a non-existent executable file. The system must return a “file not found” error.
+    \item \lstinline|ProcessCreateMultiple|: Stress test that spawns several processes simultaneously to confirm stability and handle safety under load.
+    \item \lstinline|ProcessCreateOnce|: Basic successful process creation from a valid executable.
+    \item \lstinline|ProcessCreateWithArguments|: Ensures command-line arguments are correctly passed to the new process.
+    \item \lstinline|ProcessExit|: Runs a child process that calls \lstinline|SyscallProcessExit()| with a specific status. The parent must receive the correct exit code.
+    \item \lstinline|ProcessGetPid|: Verifies that \lstinline|SyscallProcessGetPid()| returns the correct PID for both the current and target processes.
+    \item \lstinline|ProcessWaitBadHandle|: Calls \lstinline|SyscallProcessWaitForTermination()| with an invalid handle; must return an error.
+    \item \lstinline|ProcessWaitClosedHandle|: Waits on a closed process handle; must fail, confirming correct handle invalidation.
+    \item \lstinline|ProcessWaitNormal|: Parent process waits until the child exits and resumes correctly afterward.
+    \item \lstinline|ProcessWaitTerminated|: Ensures that waiting on an already-terminated process returns immediately with the correct exit code.
+\end{itemize}
+
+\subsection*{System Calls for File System Access}
+
+These tests validate file system operations and handle management logic specific to file objects.
+
+\begin{itemize}
+    \item \lstinline|FileCloseBad|: Attempts to close an invalid file handle; must fail.
+    \item \lstinline|FileCloseNormal|: Confirms that a valid file handle can be closed successfully.
+    \item \lstinline|FileCloseStdout|: Attempts to close \lstinline|STDOUT_FILENO|; must be explicitly disallowed.
+    \item \lstinline|FileCloseTwice|: First close succeeds; second must fail.
+    \item \lstinline|FileCreateBadPointer|: Calls \lstinline|SyscallFileCreate()| with a NULL filename pointer; must fail safely.
+    \item \lstinline|FileCreateEmptyPath|: Attempts to create a file with an empty string path; must fail.
+    \item \lstinline|FileCreateExistent|: Creates a file that already exists without overwrite permission; must fail.
+    \item \lstinline|FileCreateMissing|: Tries to open (not create) a non-existent file; must return “file not found”.
+    \item \lstinline|FileCreateNormal|: Successfully creates a new empty file; the standard valid case.
+    \item \lstinline|FileCreateNull|: Equivalent to a NULL path test; must fail.
+    \item \lstinline|FileCreateTwice|: Attempts to create the same file twice; the second attempt must fail.
+    \item \lstinline|FileReadBadHandle|: Reads using an invalid handle; must fail.
+    \item \lstinline|FileReadBadPointer|: Calls \lstinline|SyscallFileRead()| with an invalid buffer pointer; must fail safely.
+    \item \lstinline|FileReadKernel|: Attempts to read into kernel memory; must be detected and rejected.
+    \item \lstinline|FileReadNormal|: Performs a valid read from a known file and verifies the data.
+    \item \lstinline|FileReadStdout|: Attempts to read from write-only \lstinline|STDOUT_FILENO|; must fail.
+    \item \lstinline|FileReadZero|: Requests to read zero bytes; must succeed and report zero bytes read.
+\end{itemize}
+
+\subsection*{System Calls for Thread Management}
+\begin{itemize}
+ \item \lstinline{ThreadCloseTwice}: Try to close the same thread handle twice. The second call to close the handle should fail.
+ \item \lstinline{ThreadCreateBadPointer}: Try to create a thread and pass an invalid function pointer. The process should crash.
+ \item \lstinline{ThreadCreateMutliple}: Creates a set amount of threads (10) and waits for their termination. All threads should be created and exited successfully, and had their handles closed with no errors.
+ \item \lstinline{ThreadCreateOnce}: Create a single thread and close its handle afterwards.
+ \item \lstinline{ThreadCreateWithArguments}: Create a thread and pass arguments to the starting function. Compare the received arguments with the expected arguments and terminate the thread successfully.
+ \item \lstinline{ThreadExit}: Test the functionality of the \lstinline{SyscallThreadExit}. The execution should stop immediately.
+ \item \lstinline{ThreadGetTid}: Spawn threads and validate the uniqueness and consistency of their TIDs accross multiple threads.
+ \item \lstinline{ThreadWaitBadHandle}: Try waiting a thread on a bad handle. The call should fail.
+ \item \lstinline{ThreadWaitClosedHandle}: Try waiting a thread on a closed handle. The call should fail.
+ \item \lstinline{ThreadWaitNormal}: Test the behaviour of \lstinline{SyscallThreadWaitForTermination} under normal circumstances. The call should succeed and the exit status shoud match with that provided by the target thread.
+ \item \lstinline{ThreadWaitTerminated}: Try waiting for a thread after it has already terminated. Call to \lstinline{SyscallThreadWaitForTermination} should return successfully.
+
+\end{itemize}
 
 
 % ================================================================================= %
 \section{Observations}
 
-This section is also optional and it is here where you can give your teacher a feedback regarding your design activity.
-
-
-% ================================================================================= %
-\section{Questions that you could be asked}
-
-This section must be removed. This is only to give you some hints for your design. 
-
-Some questions you have to answer (inspired from the original Pintos design templates), but these are not the only possible questions and we insist that your design should not be based exclusively to answering such questions:
-\begin{enumerate}
-    \item argument passing
-        \begin{itemize}
-            \item Briefly describe how you implemented argument parsing.  How do you arrange for the elements of argv[] to be in the right order? How do you avoid overflowing the stack page?
-            
-            \item Why does \OSName{} implement \textit{strtok\_s()} but not \textit{strtok()}?
-            
-        \end{itemize}
-
-        \item system calls
-            \begin{itemize}
-                \item Describe how handles are associated with files, processes or threads. Are handles unique within the entire OS or just within a single process?
-                
-                \item Describe your code for reading and writing user data from the kernel.
-                
-                \item Suppose a system call causes a full page (4,096 bytes) of data to be copied from user space into the kernel. What is the least and the greatest possible number of inspections of the page table (e.g. calls to \textit{\_VmIsKernelAddress()}) that might result? What about for a system call that only copies 2 bytes of data? Is there room for improvement in these numbers, and how much?
-                
-                \item Briefly describe your implementation of the ``SyscallProcessWaitForTermination'' system call and how it interacts with process termination.
-                
-                \item Any access to user program memory at a user-specified address can fail due to a bad pointer value.  Such accesses must cause the system call to fail.  System calls are fraught with such accesses, e.g. a ``SyscallFileRead'' system call requires reading the function's four arguments from the user stack then writing an arbitrary amount of user memory, and any of these can fail at any point.  This poses a design and error-handling problem: how do you best avoid obscuring the primary function of code in a morass of error-handling?  Furthermore, when an error is detected, how do you ensure that all temporarily allocated resources (locks, buffers, etc.) are freed?  In a few paragraphs, describe the strategy or strategies you adopted for managing these issues. Give an example.
-                
-                
-                \item Consider parent process P with child process C. How do you ensure proper synchronization and avoid race conditions when P calls SyscallProcessWaitForTermination(C) before C exits?  After C exits? How do you ensure that all resources are freed in each case? How about when P terminates without waiting, before C exits? After C exits? Are there any special cases?
-
-            \end{itemize}
-
-\end{enumerate}
+It was an interesting assignment to work on. We have learnt how the user programs interact with and run on the OS.
