@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1762638668.78129 "/home/moldi/Downloads/design-documents/os-design.tex" "os-design.pdf" "os-design" 1762638669.92932 0
-  "/home/moldi/Downloads/design-documents/os-design.tex" 1762636589.19485 2664 c673bc7c3d01e413def73ce882d62c06 ""
+["pdflatex"] 1764598806.26385 "/home/moldi/Downloads/design-documents/os-design.tex" "os-design.pdf" "os-design" 1764598807.64168 0
+  "/home/moldi/Downloads/design-documents/os-design.tex" 1764594677.06307 2750 77a46b4df54006303ce95b28823fbec7 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -207,15 +207,15 @@
   "/usr/share/texlive/texmf-dist/tex/latex/yfonts/yfonts.sty" 1554411207 4363 ce392d5b8dc51027fcbcd62c6c980bc3 ""
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1737590400 40900 887e0dc8cac988a9e9c574af364cf837 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1752926249.98794 4602002 62dba5fc29055c16380d7393a2adb07a ""
-  "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1755967297 7753791 b820d06f66987a564d5235629a6b94bd ""
+  "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1763932687 7753791 fe927860a49b9e99055ebd78dd597b2c ""
   "figures/sample-image.pdf" 1669719766 7084 c9ee7a2593a4ea3545449e56fa2210c6 ""
-  "os-design.aux" 1762638669.79862 13902 b61b1a399714077f6c58716fcaff40ab "pdflatex"
-  "os-design.out" 1762638669.79962 11048 931d0fd5827ddcfa749ff49becf643eb "pdflatex"
+  "os-design.aux" 1764598807.51064 13954 8328943e7e1fecd03423899f03a34ff8 "pdflatex"
+  "os-design.out" 1764598807.51164 10559 edebaa3056d3faba3649cf697ed20702 "pdflatex"
   "os-design.sty" 1665818850 1423 10faf3772297394039d402bc01d90b8d ""
-  "os-design.tex" 1762636589.19485 2664 c673bc7c3d01e413def73ce882d62c06 ""
+  "os-design.tex" 1764594677.06307 2750 77a46b4df54006303ce95b28823fbec7 ""
   "os-module-1-design.tex" 1760195396.80039 59935 e64f4508bc00b83f96e58c76e332dd4d ""
   "os-module-2-design.tex" 1762638668.58863 45468 3df45f9ede5d2a788bcec5ef625b06e0 ""
-  "os-module-3-design.tex" 1665818850 10333 67471e95e385166e9ea622084f1f4e98 ""
+  "os-module-3-design.tex" 1764598806.07284 14334 39b9a5db9636464f1ffca16a6e2bf0dd ""
   "os-module-4-design.tex" 1665818850 14965 206c80c3b53635b0fcee629b85a30945 ""
   "os-module-design-principles.tex" 1665818850 19206 5c68a17ae1bf5931fe86d32d07c9cdd4 ""
   (generated)

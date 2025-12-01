@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.8.23)  8 NOV 2025 23:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.11.23)  1 DEC 2025 16:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -662,7 +662,7 @@ Overfull \hbox (51.3565pt too wide) in paragraph at lines 39--40
  []
 
 [5] [6] [7]
-<figures/sample-image.pdf, id=343, 364.56201pt x 134.10101pt>
+<figures/sample-image.pdf, id=334, 364.56201pt x 134.10101pt>
 File: figures/sample-image.pdf Graphic file (type pdf)
 <use figures/sample-image.pdf>
 Package pdftex.def Info: figures/sample-image.pdf  used on input line 118.
@@ -1163,9 +1163,24 @@ Overfull \hbox (21.87581pt too wide) in paragraph at lines 731--732
 
 ) (./os-module-3-design.tex [58]
 Chapter 5.
+
+Overfull \hbox (46.54399pt too wide) in paragraph at lines 25--26
+\T1/cmr/m/n/12 For im-ple-ment-ing zero pages al-lo-ca-tion, a change has to be done in [][][][][][]
+ []
+
 [59
 
-] [60] [61] [62] [63]) (./os-module-4-design.tex [64]
+] [60]
+Overfull \hbox (83.86432pt too wide) in paragraph at lines 70--71
+\T1/cmr/m/n/12 pro-cess ex-ceeds the num-ber of al-lowed phys-i-cal frames (the field [][][][][]
+ []
+
+[61]
+Overfull \hbox (0.4276pt too wide) in paragraph at lines 124--125
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[62] [63] [64] [65] [66] [67]) (./os-module-4-design.tex [68]
 Chapter 6.
 
 Overfull \hbox (7.85922pt too wide) in paragraph at lines 18--19
@@ -1177,33 +1192,33 @@ Overfull \hbox (6.21153pt too wide) in paragraph at lines 18--19
 \T1/cmr/m/n/12 ready lists and change the thread sched-uler to sup-port schedul-ing threads
  []
 
-[65
+[69
 
 ]
 Overfull \hbox (9.08894pt too wide) in paragraph at lines 24--25
 \T1/cmr/m/n/12 to the thread cre-ation sys-tem call, which will func-tion as a processor-
  []
 
-[66] [67] [68]) [69] (./os-design.aux)
+[70] [71] [72]) [73] (./os-design.aux)
 
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `os-design.out' has not changed.
-(rerunfilecheck)             Checksum: 931D0FD5827DDCFA749FF49BECF643EB;11048.
+(rerunfilecheck)             Checksum: EDEBAA3056D3FABA3649CF697ED20702;10559.
  ) 
 Here is how much of TeX's memory you used:
- 26534 strings out of 476041
- 475916 string characters out of 5793174
- 1909388 words of memory out of 6000000
- 45838 multiletter control sequences out of 15000+600000
+ 26894 strings out of 476041
+ 481845 string characters out of 5793173
+ 1911388 words of memory out of 6000000
+ 45986 multiletter control sequences out of 15000+600000
  532809 words of font info for 81 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
  92i,6n,93p,2077b,2040s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbi2488.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfit1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfti2074.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on os-design.pdf (71 pages, 537683 bytes).
+Output written on os-design.pdf (75 pages, 549440 bytes).
 PDF statistics:
- 1366 PDF objects out of 1440 (max. 8388607)
- 1240 compressed objects within 13 object streams
- 682 named destinations out of 1000 (max. 500000)
- 498 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1630 PDF objects out of 1728 (max. 8388607)
+ 1498 compressed objects within 15 object streams
+ 894 named destinations out of 1000 (max. 500000)
+ 482 words of extra memory for PDF output out of 10000 (max. 10000000)
 
