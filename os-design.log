@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.11.23)  1 DEC 2025 16:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.12.5)  7 DEC 2025 20:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1163,24 +1163,89 @@ Overfull \hbox (21.87581pt too wide) in paragraph at lines 731--732
 
 ) (./os-module-3-design.tex [58]
 Chapter 5.
+[59
 
-Overfull \hbox (46.54399pt too wide) in paragraph at lines 25--26
+]
+Overfull \hbox (69.14207pt too wide) in paragraph at lines 35--36
+\T1/cmr/m/n/12 The \T1/cmr/m/it/12 Sys-tem Calls \T1/cmr/m/n/12 com-po-nent re-quires defin-ing two key func-tions, \T1/cmtt/m/n/12 SyscallVirtualAlloc()
+ []
+
+
+Overfull \hbox (46.54399pt too wide) in paragraph at lines 47--48
 \T1/cmr/m/n/12 For im-ple-ment-ing zero pages al-lo-ca-tion, a change has to be done in [][][][][][]
  []
 
-[59
+[60] [61]
+Overfull \hbox (2.02771pt too wide) in paragraph at lines 86--90
+[]\T1/cmr/bx/n/12 Validate in-put pa-ram-e-ters \T1/cmr/m/n/12 such as []\T1/cmtt/m/n/12 BaseAddress[]\T1/cmr/m/n/12 , []\T1/cmtt/m/n/12 Size[]\T1/cmr/m/n/12 , []\T1/cmtt/m/n/12 PageRights[]\T1/cmr/m/n/12 . 
+ []
 
-] [60]
-Overfull \hbox (83.86432pt too wide) in paragraph at lines 70--71
+[62] [63] [64] [65]
+Overfull \hbox (83.86432pt too wide) in paragraph at lines 257--258
 \T1/cmr/m/n/12 pro-cess ex-ceeds the num-ber of al-lowed phys-i-cal frames (the field [][][][][]
  []
 
-[61]
-Overfull \hbox (0.4276pt too wide) in paragraph at lines 124--125
+[66] [67]
+Overfull \hbox (34.37782pt too wide) in paragraph at lines 328--329
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[68]
+Overfull \hbox (102.17616pt too wide) in paragraph at lines 382--385
+[]\T1/cmr/m/n/12 Check that \T1/cmtt/m/n/12 FreeType \T1/cmr/m/n/12 is ei-ther \T1/cmtt/m/n/12 VMM_FREE_TYPE_DECOMMIT \T1/cmr/m/n/12 or \T1/cmtt/m/n/12 VMM_FREE_TYPE_RELEASE\T1/cmr/m/n/12 . 
+ []
+
+
+Overfull \hbox (68.49539pt too wide) in paragraph at lines 396--399
+[]\T1/cmr/m/n/12 Based on \T1/cmtt/m/n/12 FreeType\T1/cmr/m/n/12 , call ei-ther \T1/cmtt/m/n/12 VmmDecommitRegion() \T1/cmr/m/n/12 or \T1/cmtt/m/n/12 VmmReleaseRegion()\T1/cmr/m/n/12 . 
+ []
+
+[69]
+Overfull \hbox (43.49237pt too wide) in paragraph at lines 455--457
+[]\T1/cmr/m/n/12 Allocate the first stack page at pro-cess startup us-ing \T1/cmtt/m/n/12 VmmAllocRegionEx()\T1/cmr/m/n/12 . 
+ []
+
+[70]
+Overfull \hbox (4.67351pt too wide) in paragraph at lines 479--481
+[]\T1/cmr/m/n/12 Confirm that ex-tend-ing the stack does not ex-ceed \T1/cmtt/m/n/12 MAX_STACK_SIZE\T1/cmr/m/n/12 . 
+ []
+
+[71] [72]
+Overfull \hbox (0.4276pt too wide) in paragraph at lines 577--578
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[62] [63] [64] [65] [66] [67]) (./os-module-4-design.tex [68]
+[73] [74] [75] [76] [77]
+Overfull \hbox (2.60176pt too wide) in paragraph at lines 773--774
+[]\T1/cmr/m/n/12 The [][][][][] func-tion finds a page in mem-ory us-ing the Sec-ond Chance
+ []
+
+[78]
+Overfull \hbox (4.86453pt too wide) in paragraph at lines 857--860
+[][]\T1/cmr/bx/n/12 WritableExecutableAllocation()[]\T1/cmr/m/n/12 : at-tempts to al-lo-cate mem-ory with
+ []
+
+[79]
+Overfull \hbox (10.14795pt too wide) in paragraph at lines 880--885
+[][]\T1/cmr/bx/n/12 SharedMemoryMismatchedRights()[]\T1/cmr/m/n/12 : Pro-cess 1 cre-ates shared mem-
+ []
+
+
+Overfull \hbox (11.71968pt too wide) in paragraph at lines 895--898
+[][]\T1/cmr/bx/n/12 OverwriteSharedMemory()[]\T1/cmr/m/n/12 : al-lo-cates a shared-memory re-gion, writes
+ []
+
+
+Overfull \hbox (4.77983pt too wide) in paragraph at lines 906--911
+[][]\T1/cmr/bx/n/12 RecursiveStackGrowth()[]\T1/cmr/m/n/12 : runs a deep re-cur-sive func-tion (e.g., 10,000
+ []
+
+
+Overfull \hbox (4.41187pt too wide) in paragraph at lines 912--917
+[][]\T1/cmr/bx/n/12 StackGrowthWithLargeLocals()[]\T1/cmr/m/n/12 : re-peat-edly in-vokes a func-tion that
+ []
+
+[80] [81]) (./os-module-4-design.tex [82] [83]
 Chapter 6.
 
 Overfull \hbox (7.85922pt too wide) in paragraph at lines 18--19
@@ -1192,14 +1257,14 @@ Overfull \hbox (6.21153pt too wide) in paragraph at lines 18--19
 \T1/cmr/m/n/12 ready lists and change the thread sched-uler to sup-port schedul-ing threads
  []
 
-[69
+[84
 
 ]
 Overfull \hbox (9.08894pt too wide) in paragraph at lines 24--25
 \T1/cmr/m/n/12 to the thread cre-ation sys-tem call, which will func-tion as a processor-
  []
 
-[70] [71] [72]) [73] (./os-design.aux)
+[85] [86] [87]) [88] (./os-design.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -1207,18 +1272,18 @@ Package rerunfilecheck Info: File `os-design.out' has not changed.
 (rerunfilecheck)             Checksum: EDEBAA3056D3FABA3649CF697ED20702;10559.
  ) 
 Here is how much of TeX's memory you used:
- 26894 strings out of 476041
- 481845 string characters out of 5793173
- 1911388 words of memory out of 6000000
- 45986 multiletter control sequences out of 15000+600000
+ 27362 strings out of 476041
+ 489165 string characters out of 5793174
+ 1909388 words of memory out of 6000000
+ 46159 multiletter control sequences out of 15000+600000
  532809 words of font info for 81 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
  92i,6n,93p,2077b,2040s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbi2488.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfit1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfti2074.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on os-design.pdf (75 pages, 549440 bytes).
+Output written on os-design.pdf (90 pages, 590737 bytes).
 PDF statistics:
- 1630 PDF objects out of 1728 (max. 8388607)
- 1498 compressed objects within 15 object streams
- 894 named destinations out of 1000 (max. 500000)
+ 2036 PDF objects out of 2073 (max. 8388607)
+ 1885 compressed objects within 19 object streams
+ 1189 named destinations out of 1200 (max. 500000)
  482 words of extra memory for PDF output out of 10000 (max. 10000000)
 

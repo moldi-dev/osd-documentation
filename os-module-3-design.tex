@@ -7,6 +7,15 @@
 
 \subsection{Initial Functionality}
 
+\subsubsection*{System calls}
+
+The \texttt{SyscallVirtualAlloc} and \texttt{SyscallVirtualFree} functions provide user programs in HAL9000 with the ability to dynamically control their virtual memory. These functions support both private and shared memory regions, apply security rules such as preventing pages from being both writable and executable, and promote efficient resource usage. Shared memory segments are tracked through a system-wide table, enabling processes to communicate with one another while still upholding proper isolation.
+
+\subsubsection*{Stack Growth}
+
+In HAL9000, stack expansion begins with a single allocated page and grows gradually as needed, triggered by page faults resulting from valid stack activity. The system uses heuristics to differentiate proper stack accesses, provisions additional pages up to a configurable maximum (such as 8\,MB), and updates the related metadata. This mechanism offers flexibility for demanding applications while maintaining safeguards that prevent excessive memory consumption.
+
+
 \subsubsection*{Per Process Quotas}
 
 The processes are currently allowed to open as many files as they want and also use as many physical frames as they want.
@@ -15,7 +24,20 @@ The processes are currently allowed to open as many files as they want and also 
 
 The OS doesn't allow allocating pages which are zero-initialized. Any attempt to do so will result in an assertion failure.
 
+\subsubsection*{Swapping}
+
+Currently, the operating system does not implement a method for memory swapping. The OS cannot handle memory overflow and as such, programs may behave unexpectedly or crash.
+
 \subsection{Requirements}
+
+\subsubsection*{System calls}
+
+The \textit{System Calls} component requires defining two key functions, \texttt{SyscallVirtualAlloc()} and \texttt{SyscallVirtualFree()}, which allow user programs to request and release virtual memory dynamically. These functions must support both private and shared memory segments, enforce appropriate access permissions, and correctly map shared regions between processes when valid keys are supplied. Robust parameter checking and reliable error-handling behavior are also essential parts of the implementation.
+
+\subsubsection*{Stack Growth}
+
+For \textit{Stack Growth}, the assignment requires extending the virtual memory system so that the stack can grow on demand. This consists of recognizing valid downward stack accesses, creating new pages when growth is needed, and enforcing a strict upper limit on the total stack size to avoid exhausting system resources. All of these modifications must work in coordination with the current page-fault mechanism to maintain safe and efficient stack behavior during program execution.
+
 
 \subsubsection*{Per Process Quotas}
 
@@ -24,17 +46,132 @@ The processes are limited (each one) to a maximum number of 16 open files and 16
 \subsubsection*{Zero Pages}
 For implementing zero pages allocation, a change has to be done in \lstinline|VmmAllocRegionEx()| in which the zero allocation assertion has to be removed and the function has to be updated with an implementation which allocates pages with zero bytes.
 
+\subsubsection*{Swapping}
+Memory swapping represents allowing the OS to continue operating when it runs out of memory. This process implies temporarily moving less used pages to a designated area on the disk, and bringing them back when needed. If a process uses up its physical memory, the second chance algorithm is used to determine which pages to be swapped out, creating new memory space. If a swapped out page is needed, the system retrieves it from the disk. Memory swapping can pe implemented inside \lstinline|vmm| and \lstinline|iomu|.
+
 \subsection{Basic Use Cases}
+
+\subsubsection*{System calls}
+
+\textit{System Calls:} One practical example of using \texttt{SyscallVirtualAlloc()} occurs in a text editor when a user loads a sizable document. The editor may request extra memory to hold temporary modifications, ensuring the program has sufficient space while still managing resources efficiently. Once the user finishes working with the file and closes it, the editor then invokes \texttt{SyscallVirtualFree()} to return the previously allocated memory, helping prevent leaks and maintaining overall system efficiency.
+
+\subsubsection*{Stack Growth}
+
+\textit{Stack Growth:} Imagine a scientific simulation program that performs deep recursive operations to process extensive datasets. As the recursion depth grows, the initially allocated stack space may no longer be adequate. By supporting dynamic stack expansion, the program can obtain additional stack pages during execution, allowing it to continue running smoothly without interruption. This improves overall robustness and helps avoid stack overflow failures.
+
 
 \subsubsection*{Per Process Quotas}
 Process quotas limit how many resources a process can use, which results in fair allocation and prevention of system instability. By applying these rules, the OS ensures that no process can overwhelm its resources.
 
 \subsubsection*{Zero Pages}
 Zero Pages are used for performance optimization in the OS. They allow the apps to allocate memory pages which are initialized to zero, thus resulting in clean and secure memory allocation. It is very helpful when the apps need predictable or sanitized memory for working.
+
+\subsubsection*{Swapping}
+Memory swapping can be used to prevent unexpected crashes from programs. Imagine editing a large file (pptx, xlxs) on a system with low memory. If the system runs out of memory at any point, it may terminate the editor unexpectedly, without saving your changes. This was a common occurence in the past, when memory wasn't as available, and computers were often used as mainframes, with many users competing for resources. In 2025, memory prices have increased dramatically and might continue to do so. A system without swap functionality may be unuseable.
+
 % ================================================================================= %
 \section{Design Description}
 
 \subsection{Needed Data Structures and Functions}
+
+\subsubsection*{Shared Memory Management System Calls}
+
+\subsubsection*{\textcolor{blue}{STATUS \; SyscallVirtualAlloc}}
+
+\textbf{Purpose:}
+Reserves virtual memory for a process, supporting both private regions and shared-memory allocations.
+
+\textbf{Key Steps:}
+\begin{enumerate}
+    \item \textbf{Validate input parameters} such as 
+          \texttt{\textcolor{blue}{BaseAddress}}, 
+          \texttt{\textcolor{blue}{Size}}, 
+          \texttt{\textcolor{blue}{PageRights}}.
+          
+    \item \textbf{Process shared-memory requests:}
+    \begin{itemize}
+        \item If \texttt{\textcolor{blue}{Key = 0}}, treat as a private allocation.
+        \item If \texttt{\textcolor{blue}{Key}} is nonzero:
+        \begin{itemize}
+            \item Search the \texttt{\textcolor{blue}{sharedMemoryTable}} for a matching entry.
+            \item Map the region if found; otherwise create a new shared entry.
+        \end{itemize}
+    \end{itemize}
+
+    \item Allocate the region using \texttt{\textcolor{blue}{VmmAllocRegionEx()}}.
+
+    \item Return the resulting base address.
+\end{enumerate}
+
+\subsubsection*{\textcolor{blue}{STATUS \; SyscallVirtualFree}}
+
+\textbf{Purpose:}  
+Frees virtual memory regions previously allocated by the process.
+
+\textbf{Key Steps:}
+\begin{enumerate}
+    \item \textbf{Validate inputs}
+    including 
+          \texttt{\textcolor{blue}{BaseAddress}}, 
+          \texttt{\textcolor{blue}{Size}}, 
+          \texttt{\textcolor{blue}{FreeType}}.
+
+    \item \textbf{Handle shared-memory cleanup:}
+    \begin{itemize}
+        \item Consult the \texttt{\textcolor{blue}{sharedMemoryTable}} for an associated entry.
+        \item Adjust reference counts or remove the entry if needed.
+    \end{itemize}
+
+    \item Release the region using \texttt{\textcolor{blue}{VmmFreeRegionEx()}}.
+\end{enumerate}
+
+\subsubsection*{Stack Growth}
+
+\subsubsection*{Core Data Structures}
+
+\paragraph{\textcolor{blue}{STACK\_METADATA}}  
+Serves as the record for the stack’s configuration, storing the base address, the active size, and the maximum permitted growth. This structure ensures that expansions remain within safe operational limits.
+
+\paragraph{\textcolor{blue}{STACK\_PAGE}}  
+Defines each 4KB unit composing the stack. These units are arranged as a linked sequence, enabling incremental expansion when additional space is required.
+
+\subsubsection*{Growth Mechanisms}
+
+\subsubsection*{Initial Setup}
+When a process begins execution, a predefined stack region (e.g., 16\,KB) is assigned through virtual memory allocation to establish the starting layout.
+
+\subsubsection*{Dynamic Expansion}
+As the stack pointer nears the boundary of its assigned region, the system performs the following operations:
+
+\begin{itemize}
+    \item Allocate additional pages using \texttt{\textcolor{blue}{VmmAllocRegionEx()}} so new memory remains contiguous.
+    \item Update \textcolor{blue}{STACK\_METADATA} to reflect the updated \textcolor{blue}{currentStackSize}.
+\end{itemize}
+
+\subsubsection*{Growth Constraints}
+To maintain system stability, expansions are checked against \textcolor{blue}{maxStackSize}. Should this threshold be exceeded, a fault is raised to prevent uncontrolled memory usage or stack overflow.
+
+\subsubsection*{System Calls}
+
+\paragraph{\textcolor{blue}{STATUS SyscallStackExpand}}  
+
+\textbf{Role:} Provide additional stack pages during execution when necessary.
+
+\textbf{Operational Sequence:}
+\begin{enumerate}
+    \item Confirm that \texttt{\textcolor{blue}{currentStackSize}} does not surpass \texttt{\textcolor{blue}{maxStackSize}}.
+    \item Extend the stack with new pages using \texttt{\textcolor{blue}{VmmAllocRegionEx()}}.
+    \item Modify \textcolor{blue}{STACK\_METADATA} and append the new segments into the \textcolor{blue}{STACK\_PAGE} chain.
+\end{enumerate}
+
+\paragraph{\textcolor{blue}{STATUS SyscallStackShrink}}  
+\textbf{Role:} Remove unused stack pages to reduce memory footprint.
+
+\textbf{Operational Sequence:}
+\begin{enumerate}
+    \item Determine which pages are no longer active and release them.
+    \item Update \textcolor{blue}{STACK\_METADATA} accordingly and detach the relevant \textcolor{blue}{STACK\_PAGE} entries.
+\end{enumerate}
 
 \subsubsection*{Per Process Quotas}
 
@@ -64,12 +201,328 @@ typedef struct _PROCESS
 \subsubsection{Zero Pages}
 The function \lstinline|VmmAllocRegionEx()| will be modified to remove the assertion \lstinline|ASSERT(!IsBooleanFlagOn(AllocType, VMM_ALLOC_TYPE_ZERO));| . This will be replaced with an implementation which initializes the allocated memory to zero by using the \lstinline|memzero()| function.
 
+\subsubsection*{Swapping}
+
+We must keep track of the swap status inside \lstinline|iomu.h|
+
+\begin{lstlisting}
+typedef struct _IOMU_DATA {
+    ...
+    PFILE_OBJECT SwapFile;
+
+    BITMAP       SwapBitmap;
+    PVOID        SwapBitmapData;
+    LOCK         SwapBitmapLock;
+
+    DWORD        SwapFileSize;
+
+    LIST_ENTRY   SwapList;
+    LOCK         SwapListGlobalLock;
+} IOMU_DATA, *PIOMU_DATA;
+\end{lstlisting}
+
+We need to keep track of the swapped data
+
+\begin{lstlisting}
+typedef struct _SWAP_ENTRY {
+    PVOID      VirtualAddress;
+    DWORD      NrOfPages;
+    LIST_ENTRY SwapListElem;
+} SWAP_ENTRY, *PSWAP_ENTRY;
+\end{lstlisting}
+
+And we also need to keep track of the owner and rights
+
+\begin{lstlisting}
+typedef struct _SWAP_INFO {
+    PVOID       VirtualAddress;
+    QWORD       OffestOrSlot;
+    PID         ProcessInfo;
+    PAGE_RIGHTS PageRights;
+}
+\end{lstlisting}
+
+Lastly, we need to change the following functions:
+\begin{itemize}
+ \item \lstinline|IomuGetSwapFile|: Provides access to the swap file. Allows retrieval of the swap file for reading and writing.
+ \item \lstinline|IomuOutSwap|: Moves a page from memory to the swap file. It allocates a slot in the bitmap, copies the page contents to the disk, and removes the page from memory.
+ \item \lstinline|IomuInSwap|: Retrieves a swapped-out page from the disk. It reads the page from the swap file and maps it into memory, and updates the bitmap and removes it from the swap list.
+ \item \lstinline|VmmSolvePageFault|: Checks if the faulting address is stored in swap. If it is, it retrieves the page into memory and solves the fault.
+ \item \lstinline|_IomuInitializeSwapFile|: Initializes the swap mechanism during system startup. Sets up the bitmap and swap list.
+\end{itemize}
+
 \subsection{Interfaces Between Components}
 
 \subsubsection*{Per Process Quotas and Zero Pages}
-They interact with the function \lstinline|VmmSolvePageFault()|. It happens when a process exceeds the number of allowed physical frames (the field \lstinline|PROCESS_MAX_PHYSICAL_FRAMES| in the file \lstinline|process_internal.h|). The components also interact with the system calls to the virtual memory system management and the stack growth by keeping track of the number of allocated frames. 
+They interact with the function \lstinline|VmmSolvePageFault()|. It happens when a process exceeds the number of allowed physical frames (the field \lstinline|PROCESS_MAX_PHYSICAL_FRAMES| in the file \lstinline|process_internal.h|). The components also interact with the system calls to the virtual memory system management and the stack growth by keeping track of the number of allocated frames.
+
+\subsubsection*{Stack Growth and System Calls}
+
+They interact with the function \lstinline|VmmSolvePageFault()|. This occurs when 
+the stack pointer approaches the current allocation boundary or when a system 
+call requests memory that has not yet been mapped. The stack growth mechanism 
+allocates or releases stack pages as needed, while the virtual memory system 
+calls manage private and shared regions. Both components cooperate by updating 
+metadata and tracking the number of frames in use, ensuring that memory 
+operations remain consistent and stay within the permitted limits.
+
+
 
 \subsection{Analysis and Detailed Functionality}
+
+\subsubsection*{SyscallVirtualAlloc}
+
+\paragraph{Function Overview}
+This system call reserves virtual memory within a user process and supports
+both conventional private mappings and shared-memory regions keyed by an
+identifier.
+
+\paragraph{Operational Behavior}
+
+\begin{enumerate}
+    \item \textbf{Parameter Verification}
+    \begin{itemize}
+        \item Ensure that \texttt{BaseAddress} is page-aligned.
+        \item Confirm that \texttt{Size} is nonzero and aligned to the page size.
+        \item Reject unsafe protection combinations such as writable and executable
+              mappings simultaneously.
+        \item Validate the shared-memory \texttt{Key} when provided.
+    \end{itemize}
+
+    \item \textbf{Shared Memory Processing}
+    \begin{itemize}
+        \item If \texttt{Key = 0}, proceed with a standard private allocation.
+        \item If \texttt{Key} is nonzero:
+        \begin{itemize}
+            \item Look for an existing entry in the \texttt{sharedMemoryTable}.
+            \item If an entry exists, attach the corresponding region to the caller.
+            \item Otherwise, create a new shared-memory region and update the table.
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Memory Reservation and Mapping}
+    \begin{itemize}
+        \item Call \texttt{VmmAllocRegionEx()} to reserve and commit the region.
+        \item If the allocation references a file, obtain the associated file object
+              using \texttt{RetrieveFileFromHandle()} before mapping.
+    \end{itemize}
+
+    \item \textbf{Function Return}
+    \begin{itemize}
+        \item On success, return the base address of the allocated region.
+        \item On failure, return a descriptive status code indicating the issue.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Pseudocode}
+
+\begin{lstlisting}
+STATUS SyscallVirtualAlloc(PVOID BaseAddress,
+                           QWORD Size,
+                           DWORD AllocType,
+                           DWORD PageRights,
+                           QWORD Key,
+                           PVOID *AllocatedOut)
+{
+    // 1. Validate parameters
+    if (!IsPageAligned(BaseAddress) || Size == 0 || !IsPageAligned(Size)) {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if ((PageRights & PAGE_RIGHTS_WRITE) &&
+        (PageRights & PAGE_RIGHTS_EXECUTE)) {
+        return STATUS_INVALID_PAGE_RIGHTS;
+    }
+
+    // 2. Process shared memory
+    if (Key != 0) {
+
+        SharedMemoryEntry *entry =
+            LookupSharedMemory(Key);
+
+        if (entry) {
+            *AllocatedOut = entry->VirtualAddress;
+            return STATUS_SUCCESS;  // Existing shared region reused
+        }
+
+        // Create a new shared entry if none exists
+        entry = CreateSharedRegion(Key, Size);
+        if (!entry) {
+            return STATUS_NO_MEMORY;
+        }
+    }
+
+    // 3. Allocate virtual memory
+    STATUS st =
+        VmmAllocRegionEx(BaseAddress, Size, AllocType, PageRights);
+
+    if (st != STATUS_SUCCESS) {
+        return st;
+    }
+
+    // 4. Final output
+    *AllocatedOut = BaseAddress;
+    return STATUS_SUCCESS;
+}
+\end{lstlisting}
+
+\subsubsection*{SyscallVirtualFree}
+
+\paragraph{Purpose}
+Releases a virtual memory region previously obtained through
+\texttt{SyscallVirtualAlloc}, supporting both private and shared allocations.
+
+\paragraph{Key Steps}
+
+\begin{enumerate}
+    \item \textbf{Parameter Validation}
+    \begin{itemize}
+        \item Verify that \texttt{BaseAddress} refers to a valid allocated region.
+        \item Ensure that \texttt{Size} is nonzero and corresponds to the region being freed.
+        \item Check that \texttt{FreeType} is either 
+              \texttt{VMM\_FREE\_TYPE\_DECOMMIT} or 
+              \texttt{VMM\_FREE\_TYPE\_RELEASE}.
+    \end{itemize}
+
+    \item \textbf{Shared Memory Handling}
+    \begin{itemize}
+        \item Locate the shared-memory entry, if any, associated with the region.
+        \item Decrement its reference count and remove the entry entirely if no
+              processes remain attached.
+    \end{itemize}
+
+    \item \textbf{Memory Release Operation}
+    \begin{itemize}
+        \item Based on \texttt{FreeType}, call either 
+              \texttt{VmmDecommitRegion()} or 
+              \texttt{VmmReleaseRegion()}.
+        \item Return the resulting status to the caller.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Pseudocode}
+\begin{lstlisting}
+STATUS SyscallVirtualFree(PVOID BaseAddress,
+                          QWORD Size,
+                          DWORD FreeType)
+{
+    // 1. Validate parameters
+    if (!IsValidAddress(BaseAddress) || Size == 0) {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    // 2. Handle shared-memory bookkeeping
+    SharedMemoryEntry *entry =
+        FindSharedMemoryEntryByAddress(BaseAddress);
+
+    if (entry) {
+        entry->RefCount--;
+
+        if (entry->RefCount == 0) {
+            RemoveSharedMemoryEntry(entry);
+        }
+    }
+
+    // 3. Release or decommit memory depending on type
+    STATUS st;
+
+    if (FreeType == VMM_FREE_TYPE_RELEASE) {
+        st = VmmReleaseRegion(BaseAddress, Size);
+    }
+    else if (FreeType == VMM_FREE_TYPE_DECOMMIT) {
+        st = VmmDecommitRegion(BaseAddress, Size);
+    }
+    else {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return st;
+}
+\end{lstlisting}
+
+\subsubsection*{Dynamic Stack Growth}
+
+\paragraph{Overview}
+Dynamic stack expansion allows the system to allocate new stack pages on demand
+when the running thread attempts to access memory beyond its currently mapped
+stack region.
+
+\paragraph{Implementation Steps}
+
+\begin{enumerate}
+    \item \textbf{Initial Stack Provisioning}
+    \begin{itemize}
+        \item Allocate the first stack page at process startup using 
+              \texttt{VmmAllocRegionEx()}.
+        \item Initialize stack-related metadata such as 
+              \texttt{currentStackSize} and \texttt{maxStackSize}.
+    \end{itemize}
+
+    \item \textbf{Detecting a Growth Condition}
+    \begin{itemize}
+        \item Extend \texttt{VmmSolvePageFault()} to recognize when a fault is a
+              legitimate attempt to grow the stack.
+        \item Use \texttt{IsStackAccess()} to verify that the faulting address is
+              below the current stack pointer and within the allowable growth
+              region.
+    \end{itemize}
+
+    \item \textbf{Allocating Additional Stack Pages}
+    \begin{itemize}
+        \item Call \texttt{VmmAllocRegionEx()} to map the next page directly below
+              the existing stack.
+        \item Ensure the allocated page is initialized to zero.
+    \end{itemize}
+
+    \item \textbf{Enforcing Size Limits}
+    \begin{itemize}
+        \item Confirm that extending the stack does not exceed 
+              \texttt{MAX\_STACK\_SIZE}.
+        \item If the limit is violated, terminate the process with a stack
+              overflow error.
+    \end{itemize}
+
+    \item \textbf{Metadata Updates}
+    \begin{itemize}
+        \item Increase \texttt{currentStackSize} appropriately after a successful
+              allocation.
+    \end{itemize}
+\end{enumerate}
+
+\begin{lstlisting}
+void HandleStackGrowth(Process *proc,
+                       QWORD faultingAddress)
+{
+    // 1. Validate that the fault is a legal stack access
+    if (!IsStackAccess(faultingAddress, proc->rsp)) {
+        TerminateProcess(proc, INVALID_MEMORY_ACCESS);
+        return;
+    }
+
+    // 2. Ensure the stack size does not exceed allowed limits
+    if (proc->currentStackSize + PAGE_SIZE > proc->maxStackSize) {
+        TerminateProcess(proc, STACK_OVERFLOW);
+        return;
+    }
+
+    // 3. Compute the new page address below the existing stack
+    PVOID newPage =
+        proc->stackBase - proc->currentStackSize - PAGE_SIZE;
+
+    STATUS st = VmmAllocRegionEx(newPage,
+                                 PAGE_SIZE,
+                                 VMM_ALLOC_TYPE_RESERVE_COMMIT,
+                                 PAGE_RIGHTS_READWRITE);
+
+    if (!SUCCEEDED(st)) {
+        TerminateProcess(proc, MEMORY_ALLOCATION_ERROR);
+        return;
+    }
+
+    // 4. Update process metadata
+    proc->currentStackSize += PAGE_SIZE;
+}
+\end{lstlisting}
 
 \subsubsection*{Per Process Quotas}
 
@@ -288,8 +741,182 @@ VmmAllocRegionEx(
 }
 \end{lstlisting}
 
+\subsubsection*{Swapping}
+The Second-Chance Algorithm works by keeping track of recently accessed pages before being moved to the sawp file. Each page is checked in a circular manner, and if it has been accessed (having a set access bit), it is skipped and its bit is unset. If the page has not been accessed, then it is a candidate for being swapped.
+
+Inside the \lstinline|IOMU_DATA| structure, we keep track of the \lstinline|SwaoFile|, where we store swapped-out memory, the \lstinline|SwapBitmap|, which we use to keep track of used slots inside the swap file, the \lstinline|SwapList|, which stores metadata for the pages, and a circular list of memory pages inside \lstinline|PageList|.
+
+The \lstinline|SWAP_ENTRY| structure stores metadata for swapped-out pages, like the virtual address, the offset or slot inside the swap file, and the access rights for the page.
+
+The \lstinline|_IomuInitializeSwapFile| function initializes all the elements needed for swapping:
+\begin{lstlisting}
+STATUS _IomuInitializeSwapFile(){
+    STATUS status = IoCreateFile(
+            &m_iomuData.SwapFile,
+            ...
+    );
+    if (status != STATUS_SUCCESS)
+        return status
+
+    InitBitmap(
+        &m_iomuData.SwapBitmap,
+        SwapFileSize/PAGE_SIZE
+    );
+
+    InitializeListHead(&m_iomuData.SwapList);
+    InitializeCircualrPageList(&m_iomuData.PageList);
+
+    return STATUS_SUCCESS
+}
+\end{lstlisting}
+
+The \lstinline|IomuOutSwap| function finds a page in memory using the Second Chance Algorithm, and moves it to the swap file:
+\begin{lstlisting}
+STATUS IomuOutSwap(){
+    auto victim = FindVictimPage();
+    auto slot = FindFreeBitmapSlot(SwapBitmap);
+    IoFileWrite(
+        SwapFile,
+        victim.VirtualAddress,
+        slot * PAGE_SIZE
+    );
+
+    auto swapEntry = CreateSwapEntry(
+        victim.VirtualAddress,
+        slot
+    );
+    InsertIntoSwapList(swapEntry);
+
+    MmuUnmapMemoryEx(victim.VirtualAddress);
+    MarkSlotAsUsed(SwapBitmap, slot);
+
+    return STATUS_SUCCESS
+}
+\end{lstlisting}
+
+The \lstinline|IomuInSwap| functions retrieves a page from the swap file back into memory while also restoring the page's metadata.
+\begin{lstlisting}
+STATUS IomuInSwap(PVOID VirtualAddress){
+    auto swapEntry = FindInSwapList(VirtualAddress);
+    auto status = IoFileRead(
+        SwapFile,
+        swapEntry.OffsetOrSlot * PAGE_SIZE
+    );
+
+    MmuMapMemoryEx(
+        VirtualAddress,
+        swapEntry.PageRights
+    );
+    RemoveFromSwapList(swapEntry);
+    MarkSlotAsFree(
+        SwapBitmap,
+        swapEntry.OffsetOrSlot
+    );
+
+    return STATUS_SUCCESS;
+}
+\end{lstlisting}
+
+The \lstinline|VmmSolvePageFault| function tries to handle page faults by swapping a page in or out. If memory is full, it will evict a page to make room. If an invalid address is accessed, it will try to retrieve that address from the swap file.
+\begin{lstlisting}
+STATUS VmmSolvePageFault(){
+    if(NotEnoughMemory){
+        auto victim = FindVictimPage();
+        IomuSwapOut(victim.VirtualAddress);
+    }
+
+    if(InvalidAddress){
+        auto swapEntry = FindInSwapList(FaultingAddress);
+        IomuInSwap(FaultingAddress);
+    }
+}
+\end{lstlisting}
+
 % ================================================================================= %
 \section{Tests}
+
+\subsection*{System Calls}
+
+\begin{itemize}
+
+    \item \textbf{\textcolor{blue}{WriteToReadOnlyPage()}}:  
+    allocates a page with read-only permissions and attempts a write operation.  
+    The expected outcome is a protection fault, confirming enforcement of read-only access.
+
+    \item \textbf{\textcolor{blue}{EagerAllocation()}}:  
+    performs an eager allocation of a large region (e.g., 16\,MB), where physical
+    frames are reserved immediately. The test verifies full read/write access
+    across the region and then frees it without errors.
+
+    \item \textbf{\textcolor{blue}{LazyAllocation()}}:  
+    allocates a large virtual range (e.g., 1\,GB) without initially assigning
+    physical frames. As memory is accessed, frames are allocated on demand.
+    The system must handle the accesses efficiently and remain within physical
+    memory limits.
+
+    \item \textbf{\textcolor{blue}{WritableExecutableAllocation()}}:  
+    attempts to allocate memory with both write and execute permissions.  
+    This request must fail due to security policies preventing WX mappings.
+
+    \item \textbf{\textcolor{blue}{ZeroInitializedAllocation()}}:  
+    creates a large zero-initialized region (e.g., 2\,GB) and validates that all
+    bytes are zero. Any non-zero value indicates a failure.
+
+    \item \textbf{\textcolor{blue}{FreeUnallocatedMemory()}}:  
+    tries to free a region that was never allocated through
+    \texttt{SyscallVirtualAlloc}.  
+    The system should reject the request and return an error code.
+
+    \item \textbf{\textcolor{blue}{FreeLargerRegion()}}:  
+    allocates a single page and attempts to free a region larger than the
+    original allocation.  
+    The free operation must fail because the size does not match.
+
+    \item \textbf{\textcolor{blue}{SharedMemoryAccess()}}:  
+    Process~1 allocates shared memory using a key and writes data.  
+    Process~2 opens the same key, reads the data, and modifies it.  
+    Changes must be visible across both processes.
+
+    \item \textbf{\textcolor{blue}{SharedMemoryMismatchedRights()}}:  
+    Process~1 creates shared memory with read/write permissions.  
+    Process~2 attempts to access the same key but requests stricter permissions
+    (e.g., execute).  
+    The system must deny the request.
+
+    \item \textbf{\textcolor{blue}{LazyAllocatedSharedMemory()}}:  
+    Process~1 lazily allocates shared memory, and Process~2 triggers physical
+    frame allocation on first access.  
+    Both processes should then operate on the shared data normally.
+
+    \item \textbf{\textcolor{blue}{InvalidFreeType()}}:  
+    attempts to free memory using an invalid or contradictory free type.  
+    The system must return an error and refuse the operation.
+
+    \item \textbf{\textcolor{blue}{OverwriteSharedMemory()}}:  
+    allocates a shared-memory region, writes data in one process, and verifies
+    that modifications are visible from other processes sharing the same key.
+
+\end{itemize}
+
+
+\subsection*{Stack Growth}
+
+\begin{itemize}
+
+    \item \textbf{\textcolor{blue}{RecursiveStackGrowth()}}:  
+    runs a deep recursive function (e.g., 10{,}000 calls), causing the stack to
+    expand beyond its initial allocation.  
+    The system should allocate new stack pages dynamically until the maximum
+    size is reached.
+
+    \item \textbf{\textcolor{blue}{StackGrowthWithLargeLocals()}}:  
+    repeatedly invokes a function that allocates a near-page-sized set of local
+    variables. Each invocation increases stack pressure and triggers the
+    allocation of additional stack pages.  
+    The system must grow the stack safely while adhering to the maximum limit.
+
+\end{itemize}
+
 
 \subsubsection{Per Process Quotas}
 
